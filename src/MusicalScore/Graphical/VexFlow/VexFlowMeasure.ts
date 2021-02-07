@@ -1373,6 +1373,15 @@ export class VexFlowMeasure extends GraphicalMeasure {
         return this.stave;
     }
 
+
+    /**
+     * Return the VexFlow beams corresponding to this graphicalMeasure
+     * @returns {Vex.Flow.Stave}
+     */
+    public getVFBeams():  { [voiceID: number]: Vex.Flow.Beam[] } {
+        return this.vfbeams;
+    }
+
     /**
      * After re-running the formatting on the VexFlow Stave, update the
      * space needed by Instructions (in VexFlow: StaveModifiers)

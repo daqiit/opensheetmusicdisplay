@@ -137,6 +137,9 @@ export class MusicPartManagerIterator {
         return this.jumpResponsibleRepetition;
     }
 
+    public get CurrentVoiceEntryIndex(): number {
+        return this.currentVoiceEntryIndex;
+    }
     /**
      * Creates a clone of this iterator which has the same actual position.
      */

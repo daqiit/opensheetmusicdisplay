@@ -162,10 +162,10 @@ export class Cursor {
 
     // This the current HTML Cursor:
     const cursorElement: HTMLImageElement = this.cursorElement;
-    cursorElement.style.top = (y * 10.0 * this.openSheetMusicDisplay.zoom) + "px";
-    cursorElement.style.left = ((x - 1.5) * 10.0 * this.openSheetMusicDisplay.zoom) + "px";
-    cursorElement.height = (height * 10.0 * this.openSheetMusicDisplay.zoom);
-    const newWidth: number = 3 * 10.0 * this.openSheetMusicDisplay.zoom;
+    cursorElement.style.top = (y * 10.0 * this.openSheetMusicDisplay.zoom) - ( height * 10.0 * this.openSheetMusicDisplay.zoom) * 0.1 + "px";
+    cursorElement.style.left = ((x - 1) * 10.0 * this.openSheetMusicDisplay.zoom) + "px";
+    cursorElement.height = ( height * 10.0 * this.openSheetMusicDisplay.zoom) * 1.2;
+    const newWidth: number = 2 * 10.0 * this.openSheetMusicDisplay.zoom;
     if (newWidth !== cursorElement.width) {
       cursorElement.width = newWidth;
       this.updateStyle(newWidth);
@@ -210,25 +210,24 @@ export class Cursor {
     this.update();
   }
 
-  private updateStyle(width: number, color: string = "#33e02f"): void {
+  public updateStyle(width: number, color: string = "#ffe400", globalAlpha: number = 0 ): void {
     // Create a dummy canvas to generate the gradient for the cursor
     // FIXME This approach needs to be improved
     const c: HTMLCanvasElement = document.createElement("canvas");
     c.width = this.cursorElement.width;
     c.height = 1;
     const ctx: CanvasRenderingContext2D = c.getContext("2d");
-    ctx.globalAlpha = 0.5;
+    ctx.globalAlpha = globalAlpha;
     // Generate the gradient
     const gradient: CanvasGradient = ctx.createLinearGradient(0, 0, this.cursorElement.width, 0);
-    gradient.addColorStop(0, "white"); // it was: "transparent"
-    gradient.addColorStop(0.2, color);
-    gradient.addColorStop(0.8, color);
-    gradient.addColorStop(1, "white"); // it was: "transparent"
+    gradient.addColorStop(0, color);
+    gradient.addColorStop(1, color);
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, width, 1);
     // Set the actual image
     this.cursorElement.src = c.toDataURL("image/png");
   }
+
 
   public get Iterator(): MusicPartManagerIterator {
     return this.iterator;
@@ -276,4 +275,31 @@ export class Cursor {
     }
     return 1;
   }
+
+  //# region 光标中自定义的方法
+  /**
+   * 光标移动到具体位置
+   */
+  public moveToPosition(measureIndex: number, voiceIndex: number): void {
+    if ( this.iterator.CurrentMeasureIndex === measureIndex &&  this.iterator.CurrentVoiceEntryIndex === voiceIndex) {
+      return;
+    }
+    //如果需要移动的位置在当前位置之前，则重置迭代器
+    if (this.iterator.CurrentMeasureIndex > measureIndex
+        || (this.iterator.CurrentMeasureIndex === measureIndex && this.iterator.CurrentVoiceEntryIndex > voiceIndex)) {
+      this.resetIterator();
+    }
+    while (!this.iterator.EndReached) {
+      if ( this.iterator.CurrentMeasureIndex === measureIndex && this.iterator.CurrentVoiceEntryIndex === voiceIndex ) {
+        break;
+      }
+      this.iterator.moveToNext();
+    }
+
+
+    this.updateCurrentPage();
+    this.update();
+  }
+
+  //#endregion
 }
