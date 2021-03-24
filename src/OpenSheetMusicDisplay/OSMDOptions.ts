@@ -42,7 +42,7 @@ export interface IOSMDOptions {
     /** Default color for a note head (without stem). Default black (undefined).
      * Only considered before loading a sample, not before render.
      * To change the color after loading a sample and before render, use note(.sourceNote).NoteheadColor.
-     * The format is Vexflow format, either "#rrggbb" or "#rrggbbtt" where <tt> is transparency. All hex values.
+     * The format is Vexflow format, either "#rrggbb" or "#rrggbboo" where <oo> is opacity (00 = transparent). All hex values.
      * E.g., a half-transparent red would be "#FF000080", invisible/transparent would be "#00000000" or "#12345600".
      */
     defaultColorNotehead?: string;
@@ -172,6 +172,8 @@ export interface IOSMDOptions {
      * So this option may result in a page break after a single measure on a page.
      */
     newPageFromXML?: boolean;
+    /** A custom function that is executed when the xml is read, modifies it, and returns a new xml string that OSMD then parses. */
+    onXMLRead?(xml: string): string;
     /** The cutoff number for rendering percussion clef stafflines as a single line. Default is 4.
      *  This is number of instruments specified, e.g. a drumset:
      *     <score-part id="P1">

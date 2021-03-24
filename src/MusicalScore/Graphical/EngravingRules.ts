@@ -12,6 +12,12 @@ import { ChordSymbolEnum, CustomChord, DegreesInfo } from "../../MusicalScore/Vo
 import { GraphicalNote } from "./GraphicalNote";
 import { Note } from "../VoiceData/Note";
 
+/** Rendering and Engraving options, more fine-grained than [[IOSMDOptions]].
+ *  Not all of these options are meant to be modified by users of the library,
+ *  full support is only given for [[IOSMDOptions]].
+ *  Nevertheless, there are many useful options here,
+ *  like Render* to (not) render certain elements (e.g. osmd.rules.RenderRehearsalMarks = false)
+ */
 export class EngravingRules {
     /** A unit of distance. 1.0 is the distance between lines of a stave for OSMD, which is 10 pixels in Vexflow. */
     public static unit: number = 1.0;
@@ -176,6 +182,11 @@ export class EngravingRules {
     public SlurSlopeMaxAngle: number;
     public SlurTangentMinAngle: number;
     public SlurTangentMaxAngle: number;
+    public SlurHeightFactor: number;
+    public SlurHeightFlattenLongSlursFactorByWidth: number;
+    public SlurHeightFlattenLongSlursFactorByAngle: number;
+    public SlurHeightFlattenLongSlursCutoffAngle: number;
+    public SlurHeightFlattenLongSlursCutoffWidth: number;
     public SlursStartingAtSameStaffEntryYOffset: number;
     public InstantaneousTempoTextHeight: number;
     public ContinuousDynamicTextHeight: number;
@@ -242,6 +253,7 @@ export class EngravingRules {
     public DefaultColorStem: string;
     public DefaultColorLabel: string;
     public DefaultColorTitle: string;
+    public DefaultColorCursor: string;
     public DefaultFontFamily: string;
     public DefaultFontStyle: FontStyles;
     public DefaultVexFlowNoteFont: string;
@@ -262,6 +274,7 @@ export class EngravingRules {
     public RenderMeasureNumbersOnlyAtSystemStart: boolean;
     public UseXMLMeasureNumbers: boolean;
     public RenderLyrics: boolean;
+    public RenderChordSymbols: boolean;
     public RenderMultipleRestMeasures: boolean;
     public AutoGenerateMutipleRestMeasuresFromRestMeasures: boolean;
     public RenderRehearsalMarks: boolean;
@@ -275,6 +288,8 @@ export class EngravingRules {
     public FingeringInsideStafflines: boolean;
     public FingeringLabelFontHeight: number;
     public FingeringOffsetX: number;
+    /** Whether to render string numbers in classical scores, i.e. not the string numbers in tabs, but e.g. for violin. */
+    public RenderStringNumbersClassical: boolean;
     /** This is not for tabs, but for classical scores, especially violin. */
     public StringNumberOffsetY: number;
     public NewSystemAtXMLNewSystemAttribute: boolean;
@@ -458,6 +473,11 @@ export class EngravingRules {
         this.SlurSlopeMaxAngle = 15.0;
         this.SlurTangentMinAngle = 30.0;
         this.SlurTangentMaxAngle = 80.0;
+        this.SlurHeightFactor = 1; // 1 = 100% (standard height). 2 = 100% flattening of all slurs.
+        this.SlurHeightFlattenLongSlursFactorByWidth = 0.24; // additional flattening for long slurs the longer they are.
+        this.SlurHeightFlattenLongSlursFactorByAngle = 0.36; // when one of these factors is high, increasing the other has a very strong effect.
+        this.SlurHeightFlattenLongSlursCutoffAngle = 47;
+        this.SlurHeightFlattenLongSlursCutoffWidth = 16; // 15 ~ slur between measure's first notes in 4/4. 14 -> problem with test_slurs_highNotes
         this.SlursStartingAtSameStaffEntryYOffset = 0.8;
 
         // Repetitions
@@ -550,6 +570,7 @@ export class EngravingRules {
         this.DefaultColorStem = this.DefaultColorNotehead;
         this.DefaultColorLabel = this.DefaultColorNotehead;
         this.DefaultColorTitle = this.DefaultColorNotehead;
+        this.DefaultColorCursor = "#33e02f"; // green
         this.DefaultFontFamily = "Times New Roman"; // what OSMD was initially optimized for
         this.DefaultFontStyle = FontStyles.Regular;
         this.DefaultVexFlowNoteFont = "gonville"; // was the default vexflow font up to vexflow 1.2.93, now it's Bravura, which is more cursive/bold
@@ -568,6 +589,7 @@ export class EngravingRules {
         this.RenderMeasureNumbersOnlyAtSystemStart = false;
         this.UseXMLMeasureNumbers = true;
         this.RenderLyrics = true;
+        this.RenderChordSymbols = true;
         this.RenderMultipleRestMeasures = true;
         this.AutoGenerateMutipleRestMeasuresFromRestMeasures = true;
         this.RenderRehearsalMarks = true;
@@ -578,6 +600,7 @@ export class EngravingRules {
         this.FingeringInsideStafflines = false;
         this.FingeringLabelFontHeight = 1.7;
         this.FingeringOffsetX = 0.0;
+        this.RenderStringNumbersClassical = true;
         this.StringNumberOffsetY = 0.0;
         this.NewSystemAtXMLNewSystemAttribute = false;
         this.NewPageAtXMLNewPageAttribute = false;
