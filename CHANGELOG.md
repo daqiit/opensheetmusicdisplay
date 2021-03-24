@@ -1,3 +1,68 @@
+## [0.9.5](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/compare/0.9.4...0.9.5) (2021-03-03)
+
+
+### Bug Fixes
+
+* **Array.prototype:** Ease Array.prototype pollution by using Object.defineProperty ([#980](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/980)) ([ecc1d8f](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/commit/ecc1d8fa5704e860c8d50c28280139e0355e9720))
+* **AutoMultiRest:** Enable multiple rest measure when invisible instrument would have prevented it ([#981](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/981)) ([d406341](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/commit/d40634105df6fcf229441d42c1f1dcdc46a904fd))
+* **Build:** Add missing MusicParts exports (MusicPartManager etc) ([5349f30](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/commit/5349f303d500b88bb79f383711a39cebab4b5893))
+* **Rehearsal Marks:** Fix shifted position when sheet has a pickup measure ([#983](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/983)) ([5c4343d](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/commit/5c4343d45a1f98784fa70c1108c8a5aad6fb5db4)), closes [#985](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/985) [#985](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/985)
+
+
+### Features
+
+* **Options:** Add options.OnXMLRead ([#982](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/982)), a function to modify the XML after reading, before parsing ([b2be3e8](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/commit/b2be3e898deb1a24f40c4f8253a938cde526708b))
+
+
+
+## [0.9.4](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/compare/0.9.3...0.9.4) (2021-02-22)
+
+### Bug Fixes
+
+* **Slurs:** The parameters for slur flattening were fine tuned to not flatten mid-length, mid-angle slurs ([#971](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/971))
+* **Transposing:** Some necessary changes for the transposition plugin hotfix (Sponsor early access build)
+
+## [0.9.3](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/compare/0.9.2...0.9.3) (2021-02-18)
+
+
+### Bug Fixes
+
+* **Beams:** Fix long stems for notes in beams ([#954](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/954)) when different (wrong) stems given in XML ([8b1d898](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/commit/8b1d898750b524d2141eddcbe236173cc8705a16))
+* **Clefs:** Fix mid-measure clef added at wrong position ([#954](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/954)) because of forward/backup node. ([1a77ae8](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/commit/1a77ae8541c288ff54a24a366251a2cf104b79fd))
+* **NotePositions:** GraphicalNote boundingbox position improved ([#966](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/966), [#967](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/967)), osmd.graphic.GetNearestNote working ([1fde0f6](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/commit/1fde0f6ca364e2c7f0509001a8fbae3947f2c430))
+* **Slurs:** Read slur orientation from xml ([#962](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/962)) (Sibelius alternative to placement) ([4ab1c44](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/commit/4ab1c4403020020022cb153ff321389cf90f3007))
+* **Slurs:** Reduce height of long, steep slurs by flattening them ([#971](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/971)) ([f128913](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/commit/f128913e2cc78ef7354d087ac133fe86334797a7))
+* **Stems:** Respect stem "None" in XML: don't display stems ([#964](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/964)) ([941c50b](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/commit/941c50b6f0e564dc84311eeae11a1e81958f6e17)), closes [#951](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/951)
+* **StringNumbersClassical:** Write as roman numerals, offset positioning, etc ([#957](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/957), [#949](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/949)) ([20b8cc9](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/commit/20b8cc90e91e6fc4040b59ddc32ba17d568ee594))
+
+
+### Features
+
+* **ChordSymbols:** Add osmd.rules.RenderChordSymbols (false now supported) ([fe19427](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/commit/fe19427f31879fca7c806240451f6e6ee85e9686))
+* **Cursor:** Add rules.DefaultColorCursor ([#961](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/961)) ([3170486](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/commit/317048691f60ce89100efbc0cb4952eeca1b71f2))
+* **Drawer:** Add drawer.DrawBoundingBox() as standalone method (([#969](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/969)), ([#961](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/discussions/961)))
+* **Overlays:** drawLine(), drawRectangle() etc returns removable svg node, add backend.removeNode() ([#970](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/970)) ([dc9c66a](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/commit/dc9c66a83a6beaa40041ba6860bc7bf26421d5ed)), closes [#961](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/961) [#b5f3f5](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/b5f3f5)
+* **String Numbers:** Add option osmd.rules.RenderStringNumbersClassical ([#949](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/949)) (boolean) ([5500251](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/commit/5500251c8dfbf4a6589ca41a6307945ef6c8041a))
+
+
+
+## [0.9.2](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/compare/0.9.1...0.9.2) (2021-01-27)
+
+
+### Bug Fixes
+
+* **Cursor:** Fix bounding box/cursor position when only one vertical measure has an endClef ([#872](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/872)) ([8b40dd3](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/commit/8b40dd395fe18f3c55d3d0aa1e0585b782241d1e)), related to [#797](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/797)
+
+
+### Features
+
+* **Chords:** Add options for chord alignment, relative x offset ([#948](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/948)) ([143899b](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/commit/143899b74226be22c3929b61439fac4ff40c2937))
+* **Rehearsal Marks:** Render Rehearsal Marks ([#919](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/919)), add several RehearsalMarks EngravingRules ([c931341](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/commit/c93134177fa390914a06a0e2a54599011353d834))
+* **Rehearsal Marks:** Add osmd.rules.RehearsalMarkXOffsetSystemStartMeasure ([#919](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/919)) (default -20[px]) ([84d60e1](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/commit/84d60e149905e5e0c9f2e1526b7c5a50931b9005))
+* **StringNumber:** Display XML String number (e.g. violin) ([#949](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/949)) ([9aba63c](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/commit/9aba63cebde76398cbca596d7c52ba892ca0c171))
+
+
+
 ## [0.9.1](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/compare/0.9.0...0.9.1) (2021-01-26)
 
 ### Bug Fixes
@@ -31,7 +96,7 @@
 ### Features
 
 * **Chords:** Display complex (Jazz) Chords correctly ([#933](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/933)), e.g. G7(b9,[#11](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/11))/B, add EngravingRules.renameChord(), addChordName() ([9ee524a](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/commit/9ee524a34c42710bff144cdb1ba0c1a2a684d586)), closes [#930](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/930) [#873](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/873) [#590](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/590) [#786](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/786)
-* **Chords:** Elongate measures for chords (merge PR [#928](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/928)) ([ba3ae42](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/commit/ba3ae428b55783b42a42704bca7a530eec3fdb35))
+* **Chords:** Elongate measures for chords - prevent most chord collisions (merge PR [#928](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/928)) ([ba3ae42](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/commit/ba3ae428b55783b42a42704bca7a530eec3fdb35))
 * **Export:** Add SVG export to OSMD and generateImages_browserless.js -> png|svg option ([#670](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/670)) ([8cf4567](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/commit/8cf4567e19dd58e37a1a8930f40960b5c71a3ef1)), closes [#932](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/932) [#932](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/932)
 * **GraphicalNote:** Add osmd.rules.GNote(note) ([#660](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/660)) to get GraphicalNote from Note ([d1d12c9](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/commit/d1d12c91ca252681097c4883d8425b0863b8267f)), closes [#559](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/559)
 * **GraphicalNote:** Add static GraphicalNote.FromNote(note, osmd.rules) ([#660](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/660), [#659](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/issues/659)) ([acf1c6e](https://github.com/opensheetmusicdisplay/opensheetmusicdisplay/commit/acf1c6ee64366db2d30b7cf942598c51710d9424))

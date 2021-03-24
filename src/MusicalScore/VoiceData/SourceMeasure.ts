@@ -8,6 +8,7 @@ import {Voice} from "./Voice";
 import {MusicSheet} from "../MusicSheet";
 import {MultiExpression} from "./Expressions/MultiExpression";
 import {MultiTempoExpression} from "./Expressions/MultiTempoExpression";
+import {RehearsalExpression} from "./Expressions/RehearsalExpression";
 import {AbstractNotationInstruction} from "./Instructions/AbstractNotationInstruction";
 import {ClefInstruction} from "./Instructions/ClefInstruction";
 import {KeyInstruction} from "./Instructions/KeyInstruction";
@@ -57,6 +58,7 @@ export class SourceMeasure {
     public printNewSystemXml: boolean = false;
     /** Whether the MusicXML says to print a new page (page break). See OSMDOptions.newPageFromXML */
     public printNewPageXml: boolean = false;
+    public IsSystemStartMeasure: boolean = false;
 
     private measureNumber: number;
     public MeasureNumberXML: number;
@@ -79,9 +81,11 @@ export class SourceMeasure {
     public multipleRestMeasureNumber: number = 0;
     private staffLinkedExpressions: MultiExpression[][] = [];
     private tempoExpressions: MultiTempoExpression[] = [];
+    public rehearsalExpression: RehearsalExpression;
     private verticalSourceStaffEntryContainers: VerticalSourceStaffEntryContainer[] = [];
     private implicitMeasure: boolean;
     private hasEndLine: boolean;
+    public hasEndClef: boolean;
     private graphicalMeasureErrors: boolean[] = [];
     private firstInstructionsStaffEntries: SourceStaffEntry[];
     private lastInstructionsStaffEntries: SourceStaffEntry[];
@@ -596,7 +600,33 @@ export class SourceMeasure {
     }
 
     public canBeReducedToMultiRest(): boolean {
-        if (!this.allRests || this.hasLyrics || this.hasMoodExpressions || this.tempoExpressions.length > 0) {
+        let allRestsOrInvisible: boolean = true;
+        let visibleLyrics: boolean = false;
+        for (const container of this.verticalSourceStaffEntryContainers) {
+            if (!container) {
+                continue;
+            }
+            for (const staffEntry of container.StaffEntries) {
+                if (!staffEntry || !staffEntry.ParentStaff.ParentInstrument.Visible) {
+                    continue; // ignore notes in invisible instruments (instruments not shown)
+                }
+                if (staffEntry.ParentStaff.hasLyrics) {
+                    visibleLyrics = true;
+                }
+                for (const voiceEntry of staffEntry.VoiceEntries) {
+                    for (const note of voiceEntry.Notes) {
+                        if (!note.isRest()) {
+                            allRestsOrInvisible = false;
+                            break;
+                        }
+                    }
+                    if (!allRestsOrInvisible) {
+                        break;
+                    }
+                }
+            }
+        }
+        if (!allRestsOrInvisible || visibleLyrics || this.hasMoodExpressions || this.tempoExpressions.length > 0) {
             return false;
         }
         // check for StaffLinkedExpressions (e.g. MultiExpression, StaffText) (per staff)

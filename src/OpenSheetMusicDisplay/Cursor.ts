@@ -228,7 +228,6 @@ export class Cursor {
     this.cursorElement.src = c.toDataURL("image/png");
   }
 
-
   public get Iterator(): MusicPartManagerIterator {
     return this.iterator;
   }

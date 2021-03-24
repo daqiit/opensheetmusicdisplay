@@ -33,7 +33,7 @@ import {GraphicalMeasure, GraphicalStaffEntry, MusicSystem, StaffLine} from "../
  * After the constructor, use load() and render() to load and render a MusicXML file.
  */
 export class OpenSheetMusicDisplay {
-    private version: string = "0.9.1-release"; // getter: this.Version
+    private version: string = "0.9.5-release"; // getter: this.Version
     // at release, bump version and change to -release, afterwards to -dev again
 
     /**
@@ -86,6 +86,7 @@ export class OpenSheetMusicDisplay {
     private autoResizeEnabled: boolean;
     private resizeHandlerAttached: boolean;
     private followCursor: boolean;
+    private OnXMLRead: Function;
 
 
     private offsetStaveNotes: StaveNote[] = [];
@@ -126,10 +127,11 @@ export class OpenSheetMusicDisplay {
                 trimmedStr = trimmedStr.trim(); // trim away empty lines at beginning etc
             }
             if (trimmedStr.substr(0, 6).includes("<?xml")) { // first character is sometimes null, making first five characters '<?xm'.
-                log.debug("[OSMD] Finally parsing XML content, length: " + trimmedStr.length);
+                const modifiedXml: string = this.OnXMLRead(trimmedStr); // by default just returns trimmedStr unless a function options.OnXMLRead was set.
+                log.debug("[OSMD] Finally parsing XML content, length: " + modifiedXml.length);
                 // Parse the string representing an xml file
                 const parser: DOMParser = new DOMParser();
-                content = parser.parseFromString(trimmedStr, "application/xml");
+                content = parser.parseFromString(modifiedXml, "application/xml");
             } else if (trimmedStr.length < 2083) { // TODO do proper URL format check
                 log.debug("[OSMD] Retrieve the file at the given URL: " + trimmedStr);
                 // Assume now "str" is a URL
@@ -296,7 +298,7 @@ export class OpenSheetMusicDisplay {
             const backend: VexFlowBackend = this.createBackend(this.backendType, page);
             const sizeWarningPartTwo: string = " exceeds CanvasBackend limit of 32767. Cutting off score.";
             if (backend.getOSMDBackendType() === BackendType.Canvas && width > canvasDimensionsLimit) {
-                console.log("[OSMD] Warning: width of " + width + sizeWarningPartTwo);
+                log.warn("[OSMD] Warning: width of " + width + sizeWarningPartTwo);
                 width = canvasDimensionsLimit;
             }
             if (this.rules.PageFormat && !this.rules.PageFormat.IsUndefined) {
@@ -313,7 +315,7 @@ export class OpenSheetMusicDisplay {
                 // console.log("pageformat not given. height: " + page.PositionAndShape.Size.height);
             }
             if (backend.getOSMDBackendType() === BackendType.Canvas && height > canvasDimensionsLimit) {
-                console.log("[OSMD] Warning: height of " + height + sizeWarningPartTwo);
+                log.warn("[OSMD] Warning: height of " + height + sizeWarningPartTwo);
                 height = Math.min(height, canvasDimensionsLimit); // this cuts off the the score, but doesn't break rendering.
                 // TODO optional: reduce zoom to fit the score within the limit.
             }
@@ -321,6 +323,7 @@ export class OpenSheetMusicDisplay {
             backend.resize(width, height);
             backend.clear(); // set bgcolor if defined (this.rules.PageBackgroundColor, see OSMDOptions)
             this.drawer.Backends.push(backend);
+            this.graphic.drawer = this.drawer;
         }
     }
 
@@ -361,6 +364,11 @@ export class OpenSheetMusicDisplay {
             log.warn("warning: osmd.setOptions() called without an options parameter, has no effect."
                 + "\n" + "example usage: osmd.setOptions({drawCredits: false, drawPartNames: false})");
             return;
+        }
+        this.OnXMLRead = function(xml): string {return xml;};
+        if (options.onXMLRead)
+        {
+            this.OnXMLRead = options.onXMLRead;
         }
         if (options.drawingParameters) {
             this.drawingParameters.DrawingParametersEnum =
@@ -1259,14 +1267,20 @@ export class OpenSheetMusicDisplay {
     public get DrawBottomLine(): boolean {
         return this.drawer.bottomLineVisible;
     }
-
     public set DrawBoundingBox(value: string) {
-        this.drawBoundingBox = value;
-        this.drawer.drawableBoundingBoxElement = value; // drawer is sometimes created anew, losing this value, so it's saved in OSMD now.
-        this.render(); // may create new Drawer.
+        this.setDrawBoundingBox(value, true);
     }
     public get DrawBoundingBox(): string {
         return this.drawBoundingBox;
+    }
+    public setDrawBoundingBox(value: string, render: boolean = false): void {
+        this.drawBoundingBox = value;
+        if (this.drawer) {
+            this.drawer.drawableBoundingBoxElement = value; // drawer is sometimes created anew, losing this value, so it's saved in OSMD now.
+        }
+        if (render) {
+            this.render(); // may create new Drawer.
+        }
     }
 
     public get AutoResizeEnabled(): boolean {

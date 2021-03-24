@@ -90,6 +90,8 @@ export abstract class MusicSheetCalculator {
     protected rules: EngravingRules;
     protected musicSystems: MusicSystem[];
 
+    private abstractNotImplementedErrorMessage: string = "abstract, not implemented";
+
     public static get TextMeasurer(): ITextMeasurer {
         return MusicSheetCalculator.textMeasurer;
     }
@@ -194,6 +196,7 @@ export abstract class MusicSheetCalculator {
             //go through all source measures again. Need to calc auto-multi-rests
             for (let idx: number = 0, len: number = musicSheet.SourceMeasures.length; idx < len; ++idx) {
                 const sourceMeasure: SourceMeasure = musicSheet.SourceMeasures[idx];
+                // console.log(sourceMeasure.MeasureNumber + " can be reduced: " + sourceMeasure.canBeReducedToMultiRest());
                 if (!sourceMeasure.isReducedToMultiRest && sourceMeasure.canBeReducedToMultiRest()) {
                     //we've already been initialized, we are in the midst of a multirest sequence
                     if (multiRestCount > 0) {
@@ -314,11 +317,11 @@ export abstract class MusicSheetCalculator {
     }
 
     public calculateMeasureWidthFromStaffEntries(measuresVertical: GraphicalMeasure[], oldMinimumStaffEntriesWidth: number): number {
-        throw new Error("abstract, not implemented");
+        throw new Error(this.abstractNotImplementedErrorMessage);
     }
 
     protected formatMeasures(): void {
-        throw new Error("abstract, not implemented");
+        throw new Error(this.abstractNotImplementedErrorMessage);
     }
 
     /**
@@ -327,18 +330,18 @@ export abstract class MusicSheetCalculator {
      * @param measures - The minimum required x width of the source measure
      */
     protected calculateMeasureXLayout(measures: GraphicalMeasure[]): number {
-        throw new Error("abstract, not implemented");
+        throw new Error(this.abstractNotImplementedErrorMessage);
     }
 
     /**
      * Called for every source measure when generating the list of staff measures for it.
      */
     protected initGraphicalMeasuresCreation(): void {
-        throw new Error("abstract, not implemented");
+        throw new Error(this.abstractNotImplementedErrorMessage);
     }
 
     protected handleBeam(graphicalNote: GraphicalNote, beam: Beam, openBeams: Beam[]): void {
-        throw new Error("abstract, not implemented");
+        throw new Error(this.abstractNotImplementedErrorMessage);
     }
 
     /**
@@ -355,23 +358,23 @@ export abstract class MusicSheetCalculator {
     protected handleTiedGraphicalNote(tiedGraphicalNote: GraphicalNote, beams: Beam[], activeClef: ClefInstruction,
                                       octaveShiftValue: OctaveEnum, graphicalStaffEntry: GraphicalStaffEntry, duration: Fraction,
                                       openTie: Tie, isLastTieNote: boolean): void {
-        throw new Error("abstract, not implemented");
+        throw new Error(this.abstractNotImplementedErrorMessage);
     }
 
     protected handleVoiceEntryLyrics(voiceEntry: VoiceEntry, graphicalStaffEntry: GraphicalStaffEntry,
                                      openLyricWords: LyricWord[]): void {
-        throw new Error("abstract, not implemented");
+        throw new Error(this.abstractNotImplementedErrorMessage);
     }
 
     protected handleVoiceEntryOrnaments(ornamentContainer: OrnamentContainer, voiceEntry: VoiceEntry,
                                         graphicalStaffEntry: GraphicalStaffEntry): void {
-        throw new Error("abstract, not implemented");
+        throw new Error(this.abstractNotImplementedErrorMessage);
     }
 
     protected handleVoiceEntryArticulations(articulations: Articulation[],
                                             voiceEntry: VoiceEntry,
                                             staffEntry: GraphicalStaffEntry): void {
-        throw new Error("abstract, not implemented");
+        throw new Error(this.abstractNotImplementedErrorMessage);
     }
 
     /**
@@ -382,30 +385,30 @@ export abstract class MusicSheetCalculator {
      */
     protected handleVoiceEntryTechnicalInstructions(technicalInstructions: TechnicalInstruction[],
                                                     voiceEntry: VoiceEntry, staffEntry: GraphicalStaffEntry): void {
-        throw new Error("abstract, not implemented");
+        throw new Error(this.abstractNotImplementedErrorMessage);
     }
 
 
     protected handleTuplet(graphicalNote: GraphicalNote, tuplet: Tuplet, openTuplets: Tuplet[]): void {
-        throw new Error("abstract, not implemented");
+        throw new Error(this.abstractNotImplementedErrorMessage);
     }
 
     protected layoutVoiceEntry(voiceEntry: VoiceEntry, graphicalNotes: GraphicalNote[],
                                graphicalStaffEntry: GraphicalStaffEntry, hasPitchedNote: boolean): void {
-        throw new Error("abstract, not implemented");
+        throw new Error(this.abstractNotImplementedErrorMessage);
     }
 
     protected layoutStaffEntry(graphicalStaffEntry: GraphicalStaffEntry): void {
-        throw new Error("abstract, not implemented");
+        throw new Error(this.abstractNotImplementedErrorMessage);
     }
 
     protected createGraphicalTie(tie: Tie, startGse: GraphicalStaffEntry, endGse: GraphicalStaffEntry, startNote: GraphicalNote,
                                  endNote: GraphicalNote): GraphicalTie {
-        throw new Error("abstract, not implemented");
+        throw new Error(this.abstractNotImplementedErrorMessage);
     }
 
     protected updateStaffLineBorders(staffLine: StaffLine): void {
-        throw new Error("abstract, not implemented");
+        throw new Error(this.abstractNotImplementedErrorMessage);
     }
 
     /**
@@ -519,7 +522,7 @@ export abstract class MusicSheetCalculator {
      * @param tieIsAtSystemBreak
      */
     protected layoutGraphicalTie(tie: GraphicalTie, tieIsAtSystemBreak: boolean, isTab: boolean): void {
-        throw new Error("abstract, not implemented");
+        throw new Error(this.abstractNotImplementedErrorMessage);
     }
 
     /**
@@ -638,7 +641,7 @@ export abstract class MusicSheetCalculator {
      */
     protected calculateSingleOctaveShift(sourceMeasure: SourceMeasure, multiExpression: MultiExpression,
                                          measureIndex: number, staffIndex: number): void {
-        throw new Error("abstract, not implemented");
+        throw new Error(this.abstractNotImplementedErrorMessage);
     }
 
     /**
@@ -648,7 +651,7 @@ export abstract class MusicSheetCalculator {
      */
     protected calculateWordRepetitionInstruction(repetitionInstruction: RepetitionInstruction,
                                                  measureIndex: number): void {
-        throw new Error("abstract, not implemented");
+        throw new Error(this.abstractNotImplementedErrorMessage);
     }
 
     /**
@@ -851,6 +854,7 @@ export abstract class MusicSheetCalculator {
         if (!this.leadSheet) {
             this.calculateTempoExpressions();
         }
+        this.calculateRehearsalMarks();
 
         // calculate all LyricWords Positions
         this.calculateLyricsPosition();
@@ -1569,7 +1573,7 @@ export abstract class MusicSheetCalculator {
     }
 
     protected createMetronomeMark(metronomeExpression: InstantaneousTempoExpression): void {
-        throw new Error("abstract, not implemented");
+        throw new Error(this.abstractNotImplementedErrorMessage);
     }
 
     protected graphicalMeasureCreatedCalculations(measure: GraphicalMeasure): void {
@@ -2245,7 +2249,7 @@ export abstract class MusicSheetCalculator {
                     const clefInstruction: ClefInstruction = <ClefInstruction>sourceStaffEntry.Instructions[0];
                     MusicSheetCalculator.symbolFactory.createInStaffClef(graphicalStaffEntry, clefInstruction);
                 }
-                if (sourceStaffEntry.ChordContainers && sourceStaffEntry.ChordContainers.length > 0) {
+                if (this.rules.RenderChordSymbols && sourceStaffEntry.ChordContainers?.length > 0) {
                     sourceStaffEntry.ParentStaff.ParentInstrument.HasChordSymbols = true;
                     MusicSheetCalculator.symbolFactory.createChordSymbols(
                         sourceStaffEntry,
@@ -2944,6 +2948,19 @@ export abstract class MusicSheetCalculator {
         }
     }
 
+    private calculateRehearsalMarks(): void {
+        if (!this.rules.RenderRehearsalMarks) {
+            return;
+        }
+        for (const measure of this.graphicalMusicSheet.ParentMusicSheet.SourceMeasures) {
+            this.calculateRehearsalMark(measure);
+        }
+    }
+
+    protected calculateRehearsalMark(measure: SourceMeasure): void {
+        throw new Error(this.abstractNotImplementedErrorMessage);
+    }
+
     private calculateMoodAndUnknownExpressions(): void {
         for (let i: number = 0; i < this.graphicalMusicSheet.ParentMusicSheet.SourceMeasures.length; i++) {
             const sourceMeasure: SourceMeasure = this.graphicalMusicSheet.ParentMusicSheet.SourceMeasures[i];
@@ -3001,15 +3018,20 @@ export abstract class MusicSheetCalculator {
 
     /** Sets a voiceEntry's stem direction to one already set in other notes in its beam, if it has one. */
     private setBeamNotesWantedStemDirections(voiceEntry: VoiceEntry): void {
-        if (voiceEntry.WantedStemDirection === StemDirectionType.Undefined &&
-            voiceEntry.Notes.length > 0) {
-            const beam: Beam = voiceEntry.Notes[0].NoteBeam;
-            if (beam) {
-                // if there is a beam, find any already set stemDirection in the beam:
-                for (const note of beam.Notes) {
-                    if (note.ParentVoiceEntry === voiceEntry) {
-                        continue;
-                    } else if (note.ParentVoiceEntry.WantedStemDirection !== StemDirectionType.Undefined) {
+        if (!(voiceEntry.Notes.length > 0)) {
+            return;
+        }
+        // don't just set direction if undefined. if there's a note in the beam with a different stem direction, Vexflow draws it with an unending stem.
+        // if (voiceEntry.WantedStemDirection === StemDirectionType.Undefined) {
+        const beam: Beam = voiceEntry.Notes[0].NoteBeam;
+        if (beam) {
+            // if there is a beam, find any already set stemDirection in the beam:
+            for (const note of beam.Notes) {
+                // if (note.ParentVoiceEntry === voiceEntry) {
+                //     continue; // this could cause a misreading, also potentially in cross-staf beams, in any case it's unnecessary.
+                //} else if
+                if (note.ParentVoiceEntry.WantedStemDirection !== StemDirectionType.Undefined) {
+                    if (note.ParentVoiceEntry.ParentSourceStaffEntry.ParentStaff.Id === voiceEntry.ParentSourceStaffEntry.ParentStaff.Id) {
                         // set the stem direction
                         voiceEntry.WantedStemDirection = note.ParentVoiceEntry.WantedStemDirection;
                         break;
