@@ -2,15 +2,35 @@ import { OpenSheetMusicDisplay, BackendType } from '../src/OpenSheetMusicDisplay
 import * as jsPDF  from '../node_modules/jspdf-yworks/dist/jspdf.min'
 import {VexFlowGraphicalNote} from "../src/MusicalScore/Graphical/VexFlow";
 var openSheetMusicDisplay = new opensheetmusicdisplay.OpenSheetMusicDisplay("osmdCanvas",{
-   autoResize: true,
-   autoBeam: true,
-   coloringEnabled: true,
-   drawTitle: true, 
-   drawSubtitle : true,
-   drawComposer:true,
-   drawCredits:true,
-   followCursor: true,
+    autoResize: true,
+    //backend: "canvas",
+    disableCursor: false,
 
+    drawPartNames: true, // try false
+    // drawTitle: false,
+    // drawSubtitle: false,
+    drawFingerings: true,
+    fingeringPosition: "left", // left is default. try right. experimental: auto, above, below.
+    // fingeringInsideStafflines: "true", // default: false. true draws fingerings directly above/below notes
+    setWantedStemDirectionByXml: true, // try false, which was previously the default behavior
+
+
+    //drawMeasureNumbers: false, // disable drawing measure numbers
+    //measureNumberInterval: 4, // draw measure numbers only every 4 bars (and at the beginning of a new system)
+    useXMLMeasureNumbers: true, // read measure numbers from xml
+
+    // coloring options
+    coloringEnabled: true,
+    // defaultColorNotehead: "#CC0055", // try setting a default color. default is black (undefined)
+    // defaultColorStem: "#BB0099",
+
+    autoBeam: false, // try true, OSMD Function Test AutoBeam sample
+    autoBeamOptions: {
+        beam_rests: false,
+        beam_middle_rests_only: false,
+        //groups: [[3,4], [1,1]],
+        maintain_stem_directions: false
+    },
 });
 var cursorTimer;
 var fromMeasureNumber, toMeasureNumber;
@@ -239,7 +259,7 @@ nextInput.onclick=function (){
    osmdCursorNext(0);
 }
 
-var xmlString=["19.musicxml","C大调属七和弦.musicxml","./BrahWiMeSample.musicxml","1.音乐园地.musicxml","蓝色多瑙河.xml","cannonD_all.xml","降B大调音阶.musicxml","1.小前奏曲.xml"]
+var xmlString=["1.小夜曲.musicxml","19.musicxml","C大调属七和弦.musicxml","./BrahWiMeSample.musicxml","1.音乐园地.musicxml","蓝色多瑙河.xml","cannonD_all.xml","降B大调音阶.musicxml","1.小前奏曲.xml"]
 loadInput.onclick=function (){
          loadMusicScore(xmlString[0],true, true, 1,16)
 }
