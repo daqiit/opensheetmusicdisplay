@@ -202,7 +202,7 @@ export class Cursor {
           cursorElement.style.top = (y * 10.0 * this.openSheetMusicDisplay.zoom) - ( height * 10.0 * this.openSheetMusicDisplay.zoom) * 0.1 + "px";
           cursorElement.style.left = ((x - 1) * 10.0 * this.openSheetMusicDisplay.zoom) + "px";
           cursorElement.height = ( height * 10.0 * this.openSheetMusicDisplay.zoom) * 1.2;
-          const newWidth: number = 2 * 10.0 * this.openSheetMusicDisplay.zoom;
+          newWidth = 2 * 10.0 * this.openSheetMusicDisplay.zoom;
         break;
     }
 

@@ -42,6 +42,7 @@ function loadMusicScore(strXml, left, right, drawFromMeasureNumber, drawUpToMeas
           openSheetMusicDisplay.setOptions({ 
               pageBackgroundColor : "#E1E1E188",
              colorStemsLikeNoteheads :true,
+              cursorsOptions:[{type: 0, color: '#ffe400', alpha: 0.5, follow: true}]
          });
          
          if (drawFromMeasureNumber && drawUpToMeasureNumber)
@@ -207,7 +208,8 @@ var isShowCursor=true;
 hideCursor.onclick=function(){
     isShowCursor=!isShowCursor;
    // openSheetMusicDisplay.cursor.updateStyle(isShowCursor?10:0,"#ffe400",1);
-    openSheetMusicDisplay.cursor.updateStyle( 2 * 10.0 * openSheetMusicDisplay.zoom,"#ffe400",isShowCursor?0.3:0);
+    openSheetMusicDisplay.cursor.updateStyle( 2 * 10.0 * openSheetMusicDisplay.zoom,{color: "#ffe400", alpha: isShowCursor?0.3:0});
+    // openSheetMusicDisplay.cursor.updateStyle( 2 * 10.0 * openSheetMusicDisplay.zoom,"#ffe400",isShowCursor?0.3:0);
 }
 redrawMeasure.onclick=function(){
     openSheetMusicDisplay.redrawMeasure(0,10);
