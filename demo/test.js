@@ -2,13 +2,19 @@ import { OpenSheetMusicDisplay, BackendType } from '../src/OpenSheetMusicDisplay
 import * as jsPDF  from '../node_modules/jspdf-yworks/dist/jspdf.min'
 import {VexFlowGraphicalNote} from "../src/MusicalScore/Graphical/VexFlow";
 var openSheetMusicDisplay = new opensheetmusicdisplay.OpenSheetMusicDisplay("osmdCanvas",{
+    followCursor: true,
+    drawCredits: false,//作者
+    drawTitle: false,//标题
+    drawSubtitle: true,
+    drawComposer: true,
+
     autoResize: true,
     //backend: "canvas",
     disableCursor: false,
 
     drawPartNames: true, // try false
-    // drawTitle: false,
-    // drawSubtitle: false,
+
+
     drawFingerings: true,
     fingeringPosition: "left", // left is default. try right. experimental: auto, above, below.
     // fingeringInsideStafflines: "true", // default: false. true draws fingerings directly above/below notes
@@ -216,7 +222,8 @@ redrawMeasure.onclick=function(){
 }
 commentArea.onclick=function(){
 
-   openSheetMusicDisplay.addAllMeasureComment(0,10);
+    openSheetMusicDisplay.measureStartIndexs=[1,3,5,6];
+    openSheetMusicDisplay.addAllClauseComment();
     // openSheetMusicDisplay.addMeasureComment(1);
     // openSheetMusicDisplay.addMeasureComment(2);
     // openSheetMusicDisplay.addCommentAreaByVoiceEntry(1,0,0,0,1,0,0,0,'第二分句',false);
@@ -285,14 +292,12 @@ async function exportImg() {
     return str;
 }
 keyOffset.onclick=function () {
-    openSheetMusicDisplay.OffsetDrawKeyOfMeasure(0,0,1,0,0,10);
-    openSheetMusicDisplay.OffsetDrawKeyOfMeasure(1,0,1,0,0,10);
+    openSheetMusicDisplay.OffsetDrawKeyOfMeasure(2,1,1,0,0,10);
+    openSheetMusicDisplay.OffsetDrawKeyOfMeasure(2,0,1,0,0,10);
 
-    openSheetMusicDisplay.OffsetDrawKeyOfMeasure(0,0,2,0,0,10);
-    openSheetMusicDisplay.OffsetDrawKeyOfMeasure(1,0,2,0,0,10);
 }
 resetSvg.onclick=function () {
-    openSheetMusicDisplay.resetSvg();
+    openSheetMusicDisplay.removeOffsetStaveNotes();
 }
 
 

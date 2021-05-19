@@ -934,33 +934,27 @@ export class OpenSheetMusicDisplay {
         staveNote.getStem().hide = true;
         staveNote.draw();
     }
-    ///重置svg
-    public resetSvg(): void {
+    ///移除偏移的音符
+    public removeOffsetStaveNotes(): void {
         for (const staveNote of this.offsetStaveNotes) {
             staveNote.setXShift(0);
         }
         const svgnode:  Element = document.body.getElementsByTagName("svg")[0];
         const nodes:  HTMLCollection = svgnode.children;
-        for (let i: number = nodes.length - 1; i > 0; i--) {
-            if ((nodes[i].nodeName === "text")) {
-                break;
-                this.offsetStaveNotes.clear();
-            } else {
-                svgnode.removeChild(nodes[i]);
-            }
-        }}
-    ///重置乐谱
-    public resetDawMusicSheet(): void {
-        this.offsetStaveNotes.clear();
-        const nodes:  NodeListOf<ChildNode> = document.body.getElementsByTagName("svg")[0].childNodes;
-        for (let i: number = nodes.length - 1; i > 0; i--) {
-            if (!(nodes[i].nodeName === "text")) {
-                document.body.getElementsByTagName("svg")[0].removeChild(nodes[i]);
-            } else {
-                break;
+        const offsetStaveNotesCount: number= this.offsetStaveNotes.length-1 ;
+        for(let i: number = offsetStaveNotesCount; i >= 0; i--){
+
+            for (let j: number = nodes.length - 1; j > 0; j--) {
+                if (nodes[j].getAttribute("id")!=null && (nodes[j].getAttribute("id") ==="vf-"+ this.offsetStaveNotes[i].getAttribute("id"))) {
+                    svgnode.removeChild(nodes[j]);
+                    break;
+                }
+
             }
         }
+        this.offsetStaveNotes.clear();
     }
+
     ///给某个音符添加注释
     public AddNoteComment(measureIndex: number, groupIndex: number, staffIndex: number, voiceIndex: number, noteIndex: number): void {
         const currentVexFlowMeasure: VexFlowMeasure = this.graphic.MeasureList[measureIndex][groupIndex] as VexFlowMeasure;
