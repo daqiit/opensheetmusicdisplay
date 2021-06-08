@@ -30,7 +30,7 @@ export class Cursor {
   protected iterator: MusicPartManagerIterator;
   private graphic: GraphicalMusicSheet;
   private hidden: boolean = true;
-  private cursorElement: HTMLImageElement;
+  public cursorElement: HTMLImageElement;
 
   /** Initialize the cursor. Necessary before using functions like show() and next(). */
   public init(manager: MusicPartManager, graphic: GraphicalMusicSheet): void {

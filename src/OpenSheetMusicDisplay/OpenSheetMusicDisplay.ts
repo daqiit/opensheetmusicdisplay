@@ -18,10 +18,19 @@ import { IOSMDOptions, OSMDOptions, AutoBeamOptions, BackendType } from "./OSMDO
 import { EngravingRules, PageFormat } from "../MusicalScore/Graphical/EngravingRules";
 import { AbstractExpression } from "../MusicalScore/VoiceData/Expressions/AbstractExpression";
 import { Dictionary } from "typescript-collections";
-import { NoteEnum } from "..";
+import {
+    GraphicalMeasure, GraphicalStaffEntry,
+    MusicSystem,
+    NoteEnum,
+    StaffLine,
+    VexFlowMeasure,
+    VexFlowMusicSystem,
+    VexFlowVoiceEntry
+} from "..";
 import { AutoColorSet } from "../MusicalScore";
 import jspdf = require("jspdf-yworks/dist/jspdf.min");
 import svg2pdf = require("svg2pdf.js/dist/svg2pdf.min");
+import StaveNote = Vex.Flow.StaveNote;
 
 /**
  * The main class and control point of OpenSheetMusicDisplay.<br>
@@ -79,6 +88,7 @@ export class OpenSheetMusicDisplay {
     private resizeHandlerAttached: boolean;
     private followCursor: boolean;
 
+    private offsetStaveNotes: StaveNote[] = [];
     /**
      * Load a MusicXML file
      * @param content is either the url of a file, or the root node of a MusicXML document, or the string content of a .xml/.mxl file
@@ -811,4 +821,365 @@ export class OpenSheetMusicDisplay {
         return this.version;
     }
     //#endregion
+
+
+    // # region xiaoqingtong中使用的方法
+    ///重新渲染分节的某个音符
+    public  UpdateDrawKeyOfMeasure(measureIndex: number, groupIndex: number, staffIndex: number, voiceIndex: number, noteIndex: number, noteheadColor: string): void {
+        const currentVexFlowMeasure: VexFlowMeasure = this.graphic.MeasureList[measureIndex][groupIndex] as VexFlowMeasure;
+        const gev1: VexFlowVoiceEntry = currentVexFlowMeasure.staffEntries[staffIndex].graphicalVoiceEntries[voiceIndex] as VexFlowVoiceEntry;
+
+        for (const item of gev1.notes) {
+            item.sourceNote.NoteheadColor = noteheadColor;
+        }
+        //  gev1.notes[noteIndex].sourceNote.NoteheadColor = noteheadColor;
+        gev1.color();
+        const stemStyle: Object = { fillStyle: noteheadColor, strokeStyle: noteheadColor };
+        const staveNote: Vex.Flow.StaveNote = (gev1.vfStaveNote as Vex.Flow.StaveNote);
+        staveNote.setStemStyle(stemStyle);
+        //修改有连音符的情况
+        if ( staveNote.getBeamCount() > 0 ) {
+            for (const voiceID in currentVexFlowMeasure.getVFStave()) {
+                if (currentVexFlowMeasure.getVFStave.hasOwnProperty(voiceID)) {
+                    for (const beam of currentVexFlowMeasure.getVFStave[voiceID]) {
+                        if (beam.getNotes().contains(staveNote)) {
+                            beam.setContext(this.drawer.Backends[0].getContext()).draw();
+                        }
+                    }
+                }
+            }
+        }
+        //避免与偏移渲染冲突
+        staveNote.getStem().hide = false;
+        staveNote.setXShift(0);
+        staveNote.draw();
+    }
+    public  changeNoteColor(measureIndex: number, groupIndex: number, staffIndex: number, voiceIndex: number, noteIndex: number, noteheadColor: string): void {
+        try {
+            const currentVexFlowMeasure: VexFlowMeasure = this.graphic.MeasureList[measureIndex][groupIndex] as VexFlowMeasure;
+            const gev1: VexFlowVoiceEntry = currentVexFlowMeasure.staffEntries[staffIndex].graphicalVoiceEntries[voiceIndex] as VexFlowVoiceEntry;
+            const staveNote: any = (gev1.vfStaveNote as any);
+            const vfNote: any = staveNote.note_heads[noteIndex];
+            vfNote.setStyle({ fillStyle: noteheadColor, strokeStyle: noteheadColor});
+            vfNote.draw();
+        } catch (e) {
+            console.log(e);
+        }
+
+    }
+    ///渲染偏移的音符
+    // tslint:disable-next-line:max-line-length
+    public  OffsetDrawKeyOfMeasure(measureIndex: number, groupIndex: number, staffIndex: number, voiceIndex: number, noteIndex: number,  offset: number): void {
+        const currentVexFlowMeasure: VexFlowMeasure = this.graphic.MeasureList[measureIndex][groupIndex] as VexFlowMeasure;
+        const gev1: VexFlowVoiceEntry = currentVexFlowMeasure.staffEntries[staffIndex].graphicalVoiceEntries[voiceIndex] as VexFlowVoiceEntry;
+        // const  noteheadColor: string = "#fd919180";
+        const  noteheadColor: string = "rgba(253,145,145,0.7)";
+        for (const item of gev1.notes) {
+            item.sourceNote.NoteheadColor = noteheadColor;
+        }
+        //  gev1.notes[noteIndex].sourceNote.NoteheadColor = noteheadColor;
+        gev1.color();
+        const stemStyle: Object = { fillStyle: noteheadColor, strokeStyle: noteheadColor };
+        const staveNote: Vex.Flow.StaveNote = (gev1.vfStaveNote as Vex.Flow.StaveNote);
+        staveNote.setStemStyle(stemStyle);
+        this.offsetStaveNotes.push(staveNote);
+        staveNote.setXShift(offset);
+        staveNote.getStem().hide = true;
+        staveNote.draw();
+    }
+    ///移除偏移的音符
+    public removeOffsetStaveNotes(): void {
+        for (const staveNote of this.offsetStaveNotes) {
+            staveNote.setXShift(0);
+        }
+        const svgnode:  Element = document.body.getElementsByTagName("svg")[0];
+        const nodes:  HTMLCollection = svgnode.children;
+        const offsetStaveNotesCount: number= this.offsetStaveNotes.length-1 ;
+        for(let i: number = offsetStaveNotesCount; i >= 0; i--){
+
+            for (let j: number = nodes.length - 1; j > 0; j--) {
+                if (nodes[j].getAttribute("id")!=null && (nodes[j].getAttribute("id") ==="vf-"+ this.offsetStaveNotes[i].getAttribute("id"))) {
+                    svgnode.removeChild(nodes[j]);
+                    break;
+                }
+
+            }
+        }
+        this.offsetStaveNotes.clear();
+    }
+
+    ///给某个音符添加注释
+    public AddNoteComment(measureIndex: number, groupIndex: number, staffIndex: number, voiceIndex: number, noteIndex: number): void {
+        const currentVexFlowMeasure: VexFlowMeasure = this.graphic.MeasureList[measureIndex][groupIndex] as VexFlowMeasure;
+        const gev1: VexFlowVoiceEntry = currentVexFlowMeasure.staffEntries[staffIndex].graphicalVoiceEntries[voiceIndex] as VexFlowVoiceEntry;
+        (gev1.vfStaveNote as Vex.Flow.StaveNote).addModifier(0,  new Vex.Flow.Bend("注释"));
+        (gev1.vfStaveNote as Vex.Flow.StaveNote).preFormat();
+        (gev1.vfStaveNote as Vex.Flow.StaveNote).drawModifiers();
+    }
+    ///重新渲染所有的分节
+    public  redrawAllMeasure(): void {
+        const measures: VexFlowMeasure[][] = this.graphic.MeasureList as VexFlowMeasure[][];
+        for ( const measure of measures) {
+            for ( const item of measure) {
+                item.draw(this.drawer.Backends[0].getContext());
+            }
+        }
+    }
+    ///重新渲染分节measurStart到measureEnd
+    public  redrawMeasure(startMeasurIndex: number , endMeasureIndex: number): void {
+        const measures: VexFlowMeasure[][] = this.graphic.MeasureList as VexFlowMeasure[][];
+        for ( const measure of measures) {
+            for ( const item of measure) {
+                if (item.MeasureNumber >= startMeasurIndex + 1 && item.MeasureNumber <= endMeasureIndex + 1) {
+                    item.draw(this.drawer.Backends[0].getContext());
+                }
+            }
+        }
+    }
+
+    ///根据voice来添加注释区域
+    public addCommentAreaByVoiceEntry(startMeasureIndex: number, startGroupIndex: number, startStaffIndex: number, startVoiceIndex: number,
+                                      endMeasureIndex: number, endGroupIndex: number, endStaffIndex: number, endVoiceIndex: number, word: string,
+                                      isAddBorder: boolean = false): void {
+        const startMeasure: VexFlowMeasure = <VexFlowMeasure> this.graphic.MeasureList[startMeasureIndex][startGroupIndex];
+        // tslint:disable-next-line:max-line-length
+        const startVoice: VexFlowVoiceEntry = <VexFlowVoiceEntry> startMeasure.staffEntries[startStaffIndex].graphicalVoiceEntries[startVoiceIndex];
+        const endMeasure: GraphicalMeasure = this.graphic.MeasureList[endMeasureIndex][endGroupIndex];
+        // tslint:disable-next-line:max-line-length
+        const endVoice: VexFlowVoiceEntry = <VexFlowVoiceEntry> endMeasure.staffEntries[endStaffIndex].graphicalVoiceEntries[endVoiceIndex];
+        const startIndex: number = startMeasure.parentMusicSystem.Id;
+        const endIndex: number = endMeasure.parentMusicSystem.Id;
+        //可能一个区域分布在多行musicsystem上
+
+        for (let i: number = startIndex; i <= endIndex ; i++ ) {
+            let startX: number = 0;
+            let endX: number = 0;
+            const currentMusicSystem: MusicSystem = this.graphic.MusicPages[0].MusicSystems[i];
+            if ( i === startIndex) {
+                startX = startVoice.PositionAndShape.AbsolutePosition.x * 10.0 * this.zoom;
+            } else {
+                for ( const graphicalMeasure of currentMusicSystem.GraphicalMeasures) {
+                    for ( const graphicalMeasureItem of graphicalMeasure) {
+                        if ( startX === 0 || graphicalMeasureItem.PositionAndShape.AbsolutePosition.x * 10.0 * this.zoom < startX) {
+                            startX = graphicalMeasureItem.PositionAndShape.AbsolutePosition.x * 10.0 * this.zoom;
+                        }
+                    }
+                }
+            }
+            if ( i === endIndex) {
+                endX = endVoice.PositionAndShape.AbsolutePosition.x * 10.0 * this.zoom;
+            } else {
+                endX =  currentMusicSystem.PositionAndShape.AbsolutePosition.x * 10.0 * this.zoom
+                    + currentMusicSystem.PositionAndShape.Size.width * 10.0 * this.zoom;
+            }
+            if ( isAddBorder ) {
+                const y: number = currentMusicSystem.PositionAndShape.AbsolutePosition.y + currentMusicSystem.StaffLines[0].PositionAndShape.RelativePosition.y;
+                const bottomStaffline: StaffLine = currentMusicSystem.StaffLines[currentMusicSystem.StaffLines.length - 1];
+                const endY: number = currentMusicSystem.PositionAndShape.AbsolutePosition.y +
+                    bottomStaffline.PositionAndShape.RelativePosition.y + bottomStaffline.PositionAndShape.RelativePosition.y;
+                this.addCommentArea(startX, currentMusicSystem.PositionAndShape.AbsolutePosition.y * 10.0 * this.zoom, endX, (endY - y) * 10.0 * this.zoom);
+            }
+            this.addCommentText(startX, currentMusicSystem.PositionAndShape.AbsolutePosition.y * 10.0 * this.zoom,
+                endX, this.cursor.cursorElement.height  * 10.0 * this.zoom, word);
+        }
+    }
+    ///添加分句注释
+    public addClauseComment(measureIndex: number, clauseNum: number): void {
+        const currentMeasure: GraphicalMeasure =  this.graphic.MeasureList[measureIndex][0];
+        const container: HTMLElement = this.drawer.Backends[0].getInnerElement();
+        const input: HTMLElement = document.createElement("input");
+        const height: number = 12 * 10.0 * this.zoom;
+        input.className = "measureComment";
+        input.style.position = "absolute";
+        input.style.zIndex = "5";
+        input.style.fontSize = height * 0.15 + "px";
+        // input.style.backgroundColor = "#ffeeea";
+        input.style.backgroundColor = "#FF6647";
+        input.style.color = "#ffffff";
+        input.style.border = "0";
+        input.style.borderRadius =  height * 0.2 + "px";
+        input.style.textAlign = "center";
+        const inputElement: HTMLInputElement = <HTMLInputElement>input;
+        inputElement.type = "button";
+        inputElement.value = "第" + clauseNum + "分句" ;
+        inputElement.style.top = currentMeasure.PositionAndShape.AbsolutePosition.y * 10.0 * this.zoom - height * 0.5 + "px";
+        inputElement.style.left = currentMeasure.PositionAndShape.AbsolutePosition.x * 10.0 * this.zoom + "px";
+        container.appendChild(input);
+    }
+    public clauseComments: number[]=[];
+    ///添加多个的分句备注
+    public addMultipleClauseComment(measureStartIndexes: number[]): void {
+        if (measureStartIndexes !== null) {
+            for (let i: number = 0; i < measureStartIndexes.length; i++) {
+                if(!this.clauseComments.contains(measureStartIndexes[i])){
+                    this.clauseComments.push(measureStartIndexes[i]);
+                    this.addClauseComment(measureStartIndexes[i], i + 1);
+                }
+            }
+        }
+    }
+    ///移除全部的分句备注
+    public removeAllClauseComment(): void {
+        const elements: HTMLCollectionOf<Element> = document.getElementsByClassName("measureComment");
+        while (elements.length > 0) {
+            elements[0].parentElement.removeChild(elements[0]);
+        }
+        this.clauseComments.clear();
+    }
+    ///添加注释区域
+    public addCommentArea(startX: number, startY: number, endX: number, height: number): void {
+        const container: HTMLElement = this.drawer.Backends[0].getInnerElement();
+        const commentDiv: HTMLElement = document.createElement("div");
+        commentDiv.className = "commentArea";
+        commentDiv.style.position = "absolute";
+        commentDiv.style.backgroundColor = "#ffeeea";
+        commentDiv.style.zIndex = "-2";
+        commentDiv.style.boxSizing = "content-box";
+        commentDiv.style.border = height * 0.1 + "px double #000000";
+        commentDiv.style.borderImage = "url(images/comment_area_bg.png) 18 stretch";
+
+        const commentDivElement: HTMLDivElement = <HTMLDivElement>commentDiv;
+        //定位
+        commentDivElement.style.top = startY - height * 0.1 + "px";
+        commentDivElement.style.left = startX - height * 0.1 + "px";
+        commentDivElement.style.width = (endX - startX)  + "px";
+        commentDivElement.style.height = height  + "px";
+        //样式修改
+        container.appendChild(commentDiv);
+    }
+    ///添加文本注释
+    public addCommentText(startX: number, startY: number, endX: number, height: number, word: string): void {
+        const container: HTMLElement = this.drawer.Backends[0].getInnerElement();
+        const input: HTMLElement = document.createElement("input");
+        input.className = "commentText";
+        input.style.position = "absolute";
+        input.style.zIndex = "-2";
+        input.style.backgroundColor = "#ff564b";
+        input.style.color = "#ffffff";
+        input.style.border = "0";
+        input.style.borderRadius =  height * 0.1 + "px";
+        input.style.width = height * 0.6 + "px";
+        input.style.height = height * 0.2 + "px";
+        const inputElement: HTMLInputElement = <HTMLInputElement>input;
+        inputElement.type = "button";
+        inputElement.value = word;
+        inputElement.style.top = startY - height * 0.4 + "px";
+        inputElement.style.left = startX + (endX - startX)  / 2 - height * 0.3  + "px";
+        container.appendChild(input);
+    }
+    ///清除所有注释
+    public clearCommentArea(): void {
+        const container: HTMLElement = this.drawer.Backends[0].getInnerElement();
+        const comentAreas:  NodeListOf<Element> = container.getElementsByClassName("commentArea");
+        //清除区域框选
+        while (comentAreas.length > 0) {
+            container.removeChild(comentAreas[0]);
+        }
+        //清除文字
+        const commentTexts: NodeListOf<Element> = container.getElementsByClassName("commentText");
+        while (commentTexts.length > 0) {
+            container.removeChild(commentTexts[0]);
+        }
+
+    }
+
+
+
+    public drawMeasureBackGround(startMeasureIndex: number, endMeasureIndex: number, color?: string): void {
+
+        if (color !== null && color !== "" && color !== undefined) {
+            for (let i: number = startMeasureIndex; i <= endMeasureIndex; i++) {
+                this.drawerMeasureBackground(i, color);
+            }
+        }
+    }
+    public clearAllMeasureBackGround(): void {
+
+        const elements: HTMLCollectionOf<Element> = document.getElementsByClassName("measureBackgroundImg");
+        while (elements.length > 0) {
+            elements[0].parentElement.removeChild(elements[0]);
+        }
+    }
+    private drawerMeasureBackground(measureIndex: number, color: string): void {
+        const container: HTMLElement = this.drawer.Backends[0].getInnerElement();
+        // tslint:disable-next-line:typedef
+        const currentMeasure: VexFlowMeasure = this.graphic.MeasureList[measureIndex].last() as VexFlowMeasure;
+        const musicSystem: VexFlowMusicSystem = currentMeasure.parentMusicSystem as VexFlowMusicSystem;
+        const stave: Vex.Flow.Stave = currentMeasure.getVFStave();
+        if (stave) {
+
+            // find unique measureBackground id in document
+            const measureImg: HTMLElement = document.createElement("img");
+            measureImg.style.position = "absolute";
+            measureImg.style.zIndex = "-2";
+            measureImg.className = "measureBackgroundImg";
+            this.container.appendChild(measureImg);
+            // tslint:disable-next-line:typedef
+            const measureBackgroundElement: HTMLImageElement = <HTMLImageElement>measureImg;
+
+            measureBackgroundElement.style.left = (stave.getX()  * this.zoom) + "px";
+            measureBackgroundElement.width = (stave.getWidth() * this.zoom);
+
+            const bottomStaffline: StaffLine = musicSystem.StaffLines[musicSystem.StaffLines.length - 1];
+            // tslint:disable-next-line:typedef
+            const y: number = musicSystem.PositionAndShape.AbsolutePosition.y + musicSystem.StaffLines[0].PositionAndShape.RelativePosition.y;
+            const endY: number = musicSystem.PositionAndShape.AbsolutePosition.y +
+                bottomStaffline.PositionAndShape.RelativePosition.y + bottomStaffline.PositionAndShape.RelativePosition.y;
+            measureBackgroundElement.height  = ((endY - y) * 10.0 * this.zoom);
+            measureBackgroundElement.style.top = (y * 10.0 * this.zoom) + "px";
+
+            //构建填充
+            const c: HTMLCanvasElement = document.createElement("canvas");
+            c.width = measureBackgroundElement.width;
+            c.height = 1;
+            const ctx: CanvasRenderingContext2D = c.getContext("2d");
+            ctx.globalAlpha = 1;
+            // Generate the gradient
+            const gradient: CanvasGradient = ctx.createLinearGradient(0, 0, measureBackgroundElement.width, 0);
+
+            gradient.addColorStop(1, color);
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, measureBackgroundElement.width, 1);
+            measureBackgroundElement.src = c.toDataURL("image/png");
+            container.appendChild(measureBackgroundElement);
+        }
+
+
+    }
+
+    ///添加卡标签
+    public addStuckText(measureIndex: number, groupIndex: number, staffIndex: number): void {
+        // tslint:disable-next-line:max-line-length
+        const graphicalStaffEntry: GraphicalStaffEntry = <GraphicalStaffEntry> this.graphic.MeasureList[measureIndex][groupIndex].staffEntries[staffIndex];
+        const container: HTMLElement = this.drawer.Backends[0].getInnerElement();
+        // tslint:disable-next-line:max-line-length
+        const input: HTMLElement = document.createElement("input");
+        const height: number = 5 * 10.0 * this.zoom;
+        input.style.position = "absolute";
+        input.className = "stuckComment";
+        input.style.zIndex = "5";
+        input.style.fontSize = height * 0.1 + "px";
+        // input.style.backgroundColor = "#ffeeea";
+        input.style.backgroundColor = "#FF6647";
+        input.style.color = "#ffffff";
+        input.style.border = "0";
+        input.style.borderRadius =  height * 0.2 + "px";
+        input.style.textAlign = "center";
+        const inputElement: HTMLInputElement = <HTMLInputElement>input;
+        inputElement.type = "button";
+        inputElement.value = "卡" ;
+        inputElement.style.top = (graphicalStaffEntry.PositionAndShape.AbsolutePosition.y - 2.5 ) * 10.0 * this.zoom + "px";
+        inputElement.style.left = ((graphicalStaffEntry.PositionAndShape.AbsolutePosition.x - 1.5 ) * 10.0 * this.zoom  ) + "px";
+        console.log( inputElement.style.width.slice(0 , inputElement.style.width.length - 2 ));
+        console.log( parseFloat(inputElement.style.width.substring(0 , inputElement.style.width.length - 2 )));
+        console.log(inputElement.style.left);
+        container.appendChild(input);
+    }
+    ///异常全部的分句备注
+    public removeAllStuckComment(): void {
+        const elements: HTMLCollectionOf<Element> = document.getElementsByClassName("stuckComment");
+        while (elements.length > 0) {
+            elements[0].parentElement.removeChild(elements[0]);
+        }
+    }
 }
