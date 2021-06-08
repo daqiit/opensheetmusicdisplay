@@ -31,14 +31,18 @@ export class Cursor {
   private graphic: GraphicalMusicSheet;
   private hidden: boolean = true;
   public cursorElement: HTMLImageElement;
-  private cursorOptions: CursorOptions;
+  private cursorOptions: CursorOptions={
+    alpha: 0.3,
+    color: '#ffe400',
+    follow: true,
+    type:0,
+  };
   /** Initialize the cursor. Necessary before using functions like show() and next(). */
   public init(manager: MusicPartManager, graphic: GraphicalMusicSheet): void {
     this.manager = manager;
     this.reset();
     this.graphic = graphic;
-    this.hidden = true;
-    this.hide();
+    this.show();
   }
 
   /**
@@ -46,7 +50,7 @@ export class Cursor {
    */
   public show(): void {
     this.hidden = false;
-    this.resetIterator(); // TODO maybe not here? though setting measure range to draw, rerendering, then handling cursor show is difficult
+    // this.resetIterator(); // TODO maybe not here? though setting measure range to draw, rerendering, then handling cursor show is difficult
     this.update();
   }
 
@@ -173,7 +177,7 @@ export class Cursor {
     this.update();
   }
 
-  private updateStyle(width: number, cursorOptions: CursorOptions = undefined): void {
+  private updateStyle(width: number, cursorOptions: CursorOptions =  undefined): void {
     // Create a dummy canvas to generate the gradient for the cursor
     // FIXME This approach needs to be improved
     if (cursorOptions !== undefined) {

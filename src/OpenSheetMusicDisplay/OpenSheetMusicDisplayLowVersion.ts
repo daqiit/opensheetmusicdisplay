@@ -978,7 +978,7 @@ export class OpenSheetMusicDisplayLowVersion {
                 const y: number = currentMusicSystem.PositionAndShape.AbsolutePosition.y + currentMusicSystem.StaffLines[0].PositionAndShape.RelativePosition.y;
                 const bottomStaffline: StaffLine = currentMusicSystem.StaffLines[currentMusicSystem.StaffLines.length - 1];
                 const endY: number = currentMusicSystem.PositionAndShape.AbsolutePosition.y +
-                    bottomStaffline.PositionAndShape.RelativePosition.y + bottomStaffline.PositionAndShape.RelativePosition.y;
+                    bottomStaffline.PositionAndShape.RelativePosition.y + bottomStaffline.StaffLines.last().Start.y;
                 this.addCommentArea(startX, currentMusicSystem.PositionAndShape.AbsolutePosition.y * 10.0 * this.zoom, endX, (endY - y) * 10.0 * this.zoom);
             }
             this.addCommentText(startX, currentMusicSystem.PositionAndShape.AbsolutePosition.y * 10.0 * this.zoom,
@@ -1087,7 +1087,7 @@ export class OpenSheetMusicDisplayLowVersion {
 
 
 
-    public drawMeasureBackGround(startMeasureIndex: number, endMeasureIndex: number, color?: string): void {
+    public drawMeasureBackGround(startMeasureIndex: number, endMeasureIndex: number, color: string= "#ffeeea"): void {
 
         if (color !== null && color !== "" && color !== undefined) {
             for (let i: number = startMeasureIndex; i <= endMeasureIndex; i++) {
@@ -1126,7 +1126,7 @@ export class OpenSheetMusicDisplayLowVersion {
             // tslint:disable-next-line:typedef
             const y: number = musicSystem.PositionAndShape.AbsolutePosition.y + musicSystem.StaffLines[0].PositionAndShape.RelativePosition.y;
             const endY: number = musicSystem.PositionAndShape.AbsolutePosition.y +
-                bottomStaffline.PositionAndShape.RelativePosition.y + bottomStaffline.PositionAndShape.RelativePosition.y;
+                bottomStaffline.PositionAndShape.RelativePosition.y  + bottomStaffline.StaffLines.last().Start.y;
             measureBackgroundElement.height  = ((endY - y) * 10.0 * this.zoom);
             measureBackgroundElement.style.top = (y * 10.0 * this.zoom) + "px";
 
