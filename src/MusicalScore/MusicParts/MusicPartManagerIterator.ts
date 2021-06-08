@@ -107,6 +107,9 @@ export class MusicPartManagerIterator {
     public get CurrentMeasureIndex(): number {
         return this.currentMeasureIndex;
     }
+    public get CurrentVoiceEntryIndex(): number {
+        return this.currentVoiceEntryIndex;
+    }
     public get CurrentEnrolledTimestamp(): Fraction {
         return Fraction.plus(this.currentEnrolledMeasureTimestamp, this.currentVerticalContainerInMeasureTimestamp);
     }

@@ -1,5 +1,12 @@
 import { DrawingParametersEnum, ColoringModes } from "../MusicalScore/Graphical/DrawingParameters";
 
+export enum CursorType {
+    Standard = 0,
+    ThinLeft = 1,
+    ShortThinTopLeft = 2,
+    CurrentArea = 3,
+    CurrentAreaLeft = 4,
+}
 /** Possible options for the OpenSheetMusicDisplay constructor and osmd.setOptions(). None are mandatory.
  *  Note that after using setOptions(), you have to call osmd.render() again to make changes visible.
  *  Example: osmd.setOptions({defaultColorRest: "#AAAAAA", drawSubtitle: false}); osmd.render();
@@ -173,4 +180,27 @@ export interface AutoBeamOptions {
      * E.g. [[3,4],[1,4]] will beam the first 3 quarters of a measure, then the last quarter.
      */
     groups?: [number[]];
+}
+export interface CursorOptions {
+    /**
+     * Type of cursor:
+     * 0: Standard highlighting current notes
+     * 1: Thin line left to the current notes
+     * 2: Short thin line on top of stave and left to the current notes
+     * 3: Current measure
+     * 4: Current measure to left of current notes
+     */
+    type: CursorType;
+    /**
+     * Color to draw the cursor
+     */
+    color: string;
+    /**
+     * If true, this cursor will be followed.
+     */
+    alpha: number;
+    /**
+     * alpha value to be used with color (0.0 transparent, 0.5 medium, 1.0 opaque).
+     */
+    follow: boolean;
 }

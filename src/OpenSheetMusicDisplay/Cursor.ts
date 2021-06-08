@@ -7,7 +7,7 @@ import {OpenSheetMusicDisplayLowVersion} from "./OpenSheetMusicDisplayLowVersion
 import {GraphicalMusicSheet} from "../MusicalScore/Graphical/GraphicalMusicSheet";
 import {Instrument} from "../MusicalScore/Instrument";
 import {Note} from "../MusicalScore/VoiceData/Note";
-import {EngravingRules, Fraction} from "..";
+import {CursorOptions, EngravingRules, Fraction} from "..";
 import {SourceMeasure} from "../MusicalScore";
 
 /**
@@ -31,7 +31,7 @@ export class Cursor {
   private graphic: GraphicalMusicSheet;
   private hidden: boolean = true;
   public cursorElement: HTMLImageElement;
-
+  private cursorOptions: CursorOptions;
   /** Initialize the cursor. Necessary before using functions like show() and next(). */
   public init(manager: MusicPartManager, graphic: GraphicalMusicSheet): void {
     this.manager = manager;
@@ -173,19 +173,23 @@ export class Cursor {
     this.update();
   }
 
-  private updateStyle(width: number, color: string = "#33e02f"): void {
+  private updateStyle(width: number, cursorOptions: CursorOptions = undefined): void {
     // Create a dummy canvas to generate the gradient for the cursor
     // FIXME This approach needs to be improved
+    if (cursorOptions !== undefined) {
+      this.cursorOptions = cursorOptions;
+    }
     const c: HTMLCanvasElement = document.createElement("canvas");
     c.width = this.cursorElement.width;
     c.height = 1;
+
     const ctx: CanvasRenderingContext2D = c.getContext("2d");
-    ctx.globalAlpha = 0.5;
+    ctx.globalAlpha = this.cursorOptions.alpha;
     // Generate the gradient
     const gradient: CanvasGradient = ctx.createLinearGradient(0, 0, this.cursorElement.width, 0);
     gradient.addColorStop(0, "white"); // it was: "transparent"
-    gradient.addColorStop(0.2, color);
-    gradient.addColorStop(0.8, color);
+    gradient.addColorStop(0.2, this.cursorOptions.color);
+    gradient.addColorStop(0.8, this.cursorOptions.color);
     gradient.addColorStop(1, "white"); // it was: "transparent"
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, width, 1);
@@ -214,4 +218,29 @@ export class Cursor {
     });
     return notes;
   }
+
+  //# region 光标中自定义的方法
+  /**
+   * 光标移动到具体位置
+   */
+  public moveToPosition(measureIndex: number, voiceIndex: number): void {
+    if ( this.iterator.CurrentMeasureIndex === measureIndex &&  this.iterator.CurrentVoiceEntryIndex === voiceIndex) {
+      return;
+    }
+    //如果需要移动的位置在当前位置之前，则重置迭代器
+    if (this.iterator.CurrentMeasureIndex > measureIndex
+        || (this.iterator.CurrentMeasureIndex === measureIndex && this.iterator.CurrentVoiceEntryIndex > voiceIndex)) {
+      this.resetIterator();
+    }
+    while (!this.iterator.EndReached) {
+      if ( this.iterator.CurrentMeasureIndex === measureIndex && this.iterator.CurrentVoiceEntryIndex === voiceIndex ) {
+        break;
+      }
+      this.iterator.moveToNext();
+    }
+
+    this.update();
+  }
+
+  //#endregion
 }
