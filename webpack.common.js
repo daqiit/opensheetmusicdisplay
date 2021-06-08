@@ -5,7 +5,7 @@ var webpack = require('webpack')
 module.exports = {
     entry: {
         opensheetmusicdisplaylowversion: './src/index.ts', // Main index (OpenSheetMusicDisplay and other classes)
-        demo: './demo/index.js' // Demo index
+        demo: './demo/test.js' // Demo index
     },
     output: {
         path: path.resolve(__dirname, 'build'),
@@ -40,7 +40,7 @@ module.exports = {
         }),
         // add a demo page to the build folder
         new HtmlWebpackPlugin({
-            template: 'demo/index.html',
+            template: 'demo/test.html',
             favicon: 'demo/favicon.ico',
             title: 'OpenSheetMusicDisplay Demo'
         })
@@ -51,7 +51,7 @@ module.exports = {
             path.join(__dirname, 'build'),
             path.join(__dirname, 'demo')
         ],
-        port: 8000,
+        port: 8001,
         compress: false
     }
 }

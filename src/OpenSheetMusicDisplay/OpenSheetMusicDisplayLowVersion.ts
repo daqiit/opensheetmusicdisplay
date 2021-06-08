@@ -193,6 +193,8 @@ export class OpenSheetMusicDisplayLowVersion {
         if (this.drawer) {
             this.drawer.clear(); // clear canvas before setting width
         }
+        //清除数据
+        this.clauseComments.clear();
         // musicSheetCalculator.clearSystemsAndMeasures() // maybe? don't have reference though
         // musicSheetCalculator.clearRecreatedObjects();
 

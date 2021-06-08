@@ -1,0 +1,295 @@
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title> Sheet Music View </title>
+    <script src="js/jquery.min.js" type="text/javascript"></script>
+    <!-- <script src="js/underscore-min.js" type="text/javascript"></script> -->
+    <script src="js/Base64.js" type="text/javascript"></script>
+    <!-- <script src="js/Tone.js" type="text/javascript"></script> -->
+    <script src="js/opensheetmusicdisplay.v1.0.0.min.js" type="text/javascript"></script>
+    <style>
+        .message {
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            background-color: #FFF;
+            filter: alpha(opacity=50);
+            opacity: 0.5;
+            z-index: 999;
+        }
+
+        input {
+            -webkit-appearance: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="osmdCanvas"></div>
+    <div id="msg"></div>
+</body>
+<script>
+    import { OpenSheetMusicDisplay, BackendType } from '../src/OpenSheetMusicDisplay';
+
+
+    //init osmd
+    var openSheetMusicDisplay = new opensheetmusicdisplay.OpenSheetMusicDisplay("osmdCanvas", {
+        followCursor: true,
+        drawCredits: false,//作者
+        drawTitle: false,//标题
+        drawSubtitle: true,
+        drawComposer: true,
+
+        autoResize: true,
+        //backend: "canvas",
+        disableCursor: false,
+
+        drawPartNames: true, // try false
+
+
+        drawFingerings: true,
+        fingeringPosition: "left", // left is default. try right. experimental: auto, above, below.
+        // fingeringInsideStafflines: "true", // default: false. true draws fingerings directly above/below notes
+        setWantedStemDirectionByXml: true, // try false, which was previously the default behavior
+
+
+        //drawMeasureNumbers: false, // disable drawing measure numbers
+        //measureNumberInterval: 4, // draw measure numbers only every 4 bars (and at the beginning of a new system)
+        useXMLMeasureNumbers: true, // read measure numbers from xml
+
+        // coloring options
+        coloringEnabled: true,
+        // defaultColorNotehead: "#CC0055", // try setting a default color. default is black (undefined)
+        // defaultColorStem: "#BB0099",
+
+        autoBeam: false, // try true, OSMD Function Test AutoBeam sample
+        autoBeamOptions: {
+            beam_rests: false,
+            beam_middle_rests_only: false,
+            //groups: [[3,4], [1,1]],
+            maintain_stem_directions: false
+        },
+
+    });
+
+    var cursorTimer;
+    var fromMeasureNumber, toMeasureNumber;
+    var threeDatas;
+
+    //load musicxml
+    function loadMusicScore(strXml, zoom,clauseComments) {
+        try {
+            if ("" == strXml) return;
+            var str = window.decode(strXml);
+            openSheetMusicDisplay.setOptions({
+                colorStemsLikeNoteheads: true,
+                cursorsOptions: [{ type: 0, color: '#ffe400', alpha: 0.3, follow: true }],
+            });
+
+
+
+            openSheetMusicDisplay.load(str).then(function () {
+                openSheetMusicDisplay.zoom = zoom
+                openSheetMusicDisplay.render();
+                openSheetMusicDisplay.cursor.show();
+                if(clauseComments!=undefined){
+                    openSheetMusicDisplay.addMultipleClauseComment(clauseComments);
+                }
+
+                onXmlRenderFinished.postMessage("加载完成");
+
+            });
+        } catch (ex) {
+            console.log(ex);
+            SendErrorMessageToFlutter.postMessage(ex.message);
+        }
+
+    }
+
+    function callFlutter(data) {
+        // 使用postMessage toast 是定义好的名称，在接受的时候要拿这个name 去接受
+        SendSyncDataToFlutter.postMessage(data);
+    }
+
+
+    //光标移到指定位置
+    function osmdCursorMove(measureIndex, voiceIndex) {
+        try {
+            openSheetMusicDisplay.cursor.moveToPosition(measureIndex, voiceIndex);
+        } catch (ex) {
+            console.log(ex);
+            SendErrorMessageToFlutter.postMessage(ex.message);
+        }
+
+    }
+
+
+
+    //修改音符颜色,并重绘
+    function osmdNotesChangeColorAndDraw(notes) {
+
+        notes.forEach(function (item, index) {
+            openSheetMusicDisplay.changeNoteColor(item.measureIndex, item.horizontalStaffIndex, item.verticalStaffIndex, item.voiceIndex, item.noteIndex, item.noteColor);
+        })
+
+
+    }
+    //修改音符颜色，但不立即重绘
+    function osmdNotesChangeColor(notes) {
+
+        notes.forEach(function (item, index) {
+            try {
+                var voiceEntry = openSheetMusicDisplay.graphic
+                    .measureList[item.measureIndex][item.horizontalStaffIndex]
+                    .staffEntries[item.verticalStaffIndex]
+                    .graphicalVoiceEntries[item.voiceIndex];
+
+                voiceEntry.parentVoiceEntry.StemColor = item.noteColor;
+                var noteEntry = voiceEntry.notes[item.noteIndex];
+                //修改符头
+                noteEntry.sourceNote.noteheadColor = item.noteColor;
+                voiceEntry.color();
+            } catch (ex) {
+                console.log(ex);
+                SendErrorMessageToFlutter.postMessage(ex.message);
+            }
+        })
+    }
+    function addLog(text) {
+        var divMsg = document.getElementById('msg');
+        divMsg.innerHTML = divMsg.innerHTML + '<br/>' + text;
+    }
+
+    function drawMeasureBackground(drawFromMeasureNumber, drawUpToMeasureNumber) {
+        openSheetMusicDisplay.clearAllMeasureBackGround();
+        openSheetMusicDisplay.drawMeasureBackGround(drawFromMeasureNumber, drawUpToMeasureNumber, "#ffeeea");
+    }
+    function resetCursor() {
+        openSheetMusicDisplay.cursor.reset();
+        openSheetMusicDisplay.cursor.show();
+    }
+    //重新绘制分节
+    function redrawMeasure(startMeasure, endMeasure) {
+        openSheetMusicDisplay.redrawMeasure(startMeasure, endMeasure);
+    }
+
+
+    //添加注释
+    function addCommentAreaByVoiceEntry(startMeasureIndex, startGroupIndex, startStaffIndex, startVoiceIndex,
+        endMeasureIndex, endGroupIndex, endStaffIndex, endVoiceIndex, word, isAddBorder) {
+        try {
+            openSheetMusicDisplay.addCommentAreaByVoiceEntry(startMeasureIndex, startGroupIndex, startStaffIndex, startVoiceIndex,
+                endMeasureIndex, endGroupIndex, endStaffIndex, endVoiceIndex, word, isAddBorder);
+        } catch (ex) {
+            console.log(ex);
+            SendErrorMessageToFlutter.postMessage(ex.message);
+        }
+
+
+    }
+    //清除注释
+    function clearCommentArea() {
+
+        openSheetMusicDisplay.clearCommentArea();
+
+    }
+
+    //琴键偏移
+    function offsetDrawKeyOfMeasure(measureIndex, groupIndex, staffIndex, voiceIndex, noteIndex, offset) {
+
+        openSheetMusicDisplay.OffsetDrawKeyOfMeasure(measureIndex, groupIndex, staffIndex, voiceIndex, noteIndex, offset);
+
+    }
+    //琴键偏移移除
+    function removeOffsetStaveNotes() {
+
+        openSheetMusicDisplay.removeOffsetStaveNotes();
+
+    }
+    //开始练习时osmd的改变
+    function startPracticeOsmdChange(changeColorNotes) {
+        try {
+            //移除偏移
+            removeOffsetStaveNotes();
+            //清除注释
+            clearCommentArea();
+            //修改琴键颜色
+            osmdNotesChangeColor(changeColorNotes);
+            //重绘分节
+            openSheetMusicDisplay.redrawAllMeasure();
+            //清除卡标识
+            openSheetMusicDisplay.removeAllStuckComment();
+        } catch (ex) {
+            console.log(ex);
+            SendErrorMessageToFlutter.postMessage(ex.message);
+        }
+
+    }
+    //更改练习内容时osmd的改变
+    function changePracticeContentOsmdChange(measureFromIndex, measureToIndex, changeColorNotes, isShowCursor, isDrawMeasureBackgroundAndComment) {
+        try {
+            changeCursorShow(isShowCursor);
+            console.log("练习内容修改");
+            openSheetMusicDisplay.isShowClauseComment = isDrawMeasureBackgroundAndComment;
+            //修改琴键颜色
+            osmdNotesChangeColor(changeColorNotes);
+            //移除偏移音符
+            removeOffsetStaveNotes();
+            //清除注释
+            clearCommentArea();
+            //清除卡标识
+            openSheetMusicDisplay.removeAllStuckComment();
+            //重绘所有分节
+            openSheetMusicDisplay.redrawAllMeasure();
+            //画分节背景图
+            if (isDrawMeasureBackgroundAndComment) {
+                drawMeasureBackground(measureFromIndex, measureToIndex);
+            } else {
+                openSheetMusicDisplay.clearAllMeasureBackGround();
+            }
+            //光标重置
+            osmdCursorMove(measureFromIndex, 0);
+        } catch (ex) {
+            console.log(ex);
+            SendErrorMessageToFlutter.postMessage(ex.message);
+        }
+
+
+
+    }
+    ///停止练习时osmd的更改
+    function stopPracticeOsmdChange(commentAreas, offsetDatas, isAddBorder) {
+        try {
+            //添加注释
+            commentAreas.forEach(function (item, index) {
+                addCommentAreaByVoiceEntry(item.start.measureIndex, item.start.horizontalStaffIndex, item.start.verticalStaffIndex, item.start.voiceIndex, item.end.measureIndex, item.end.horizontalStaffIndex, item.end.verticalStaffIndex, item.end.voiceIndex, item.content, isAddBorder)
+            })
+            //添加偏移
+            offsetDatas.forEach(function (item, index) {
+                offsetDrawKeyOfMeasure(item.measureIndex, item.horizontalStaffIndex, item.verticalStaffIndex, item.voiceIndex, item.noteIndex, item.offset)
+            })
+        } catch (ex) {
+            console.log(ex);
+            SendErrorMessageToFlutter.postMessage(ex.message);
+        }
+
+    }
+    function changeCursorShow(isShowCursor) {
+        console.log("光标显示与隐藏");
+        console.log(isShowCursor);
+
+        openSheetMusicDisplay.cursor.updateStyle(2 * 10.0 * openSheetMusicDisplay.zoom, { color: "#ffe400", alpha: isShowCursor ? 0.3 : 0 });
+    }
+
+
+    //修改音符颜色，但不立即重绘
+    function addOsmdNotesComment(comments) {
+        comments.forEach(function (item, index) {
+            openSheetMusicDisplay.addStuckText(item.measureIndex, item.horizontalStaffIndex, item.verticalStaffIndex);
+
+        })
+    }
+</script>
+
+</html>
