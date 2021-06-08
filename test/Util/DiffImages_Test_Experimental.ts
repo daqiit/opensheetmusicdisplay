@@ -1,4 +1,4 @@
-import { OpenSheetMusicDisplay, CanvasVexFlowBackend } from "../../src";
+import { OpenSheetMusicDisplayLowVersion, CanvasVexFlowBackend } from "../../src";
 import { TestUtils } from "./TestUtils";
 //import * as fs from "fs";
 
@@ -37,8 +37,8 @@ describe("GeneratePNGImages", () => {
             // Load the xml file content
             const score: Document = TestUtils.getScore(sampleFilename);
             const div: HTMLElement = document.createElement("div");
-            const openSheetMusicDisplay: OpenSheetMusicDisplay =
-                new OpenSheetMusicDisplay(div, { autoResize: false, backend: "canvas"});
+            const openSheetMusicDisplay: OpenSheetMusicDisplayLowVersion =
+                new OpenSheetMusicDisplayLowVersion(div, { autoResize: false, backend: "canvas"});
             openSheetMusicDisplay.load(score);
 
             const testDir: string = "../data/images";

@@ -3,7 +3,7 @@ import {MusicPartManager} from "../MusicalScore/MusicParts/MusicPartManager";
 import {VoiceEntry} from "../MusicalScore/VoiceData/VoiceEntry";
 import {VexFlowStaffEntry} from "../MusicalScore/Graphical/VexFlow/VexFlowStaffEntry";
 import {MusicSystem} from "../MusicalScore/Graphical/MusicSystem";
-import {OpenSheetMusicDisplay} from "./OpenSheetMusicDisplay";
+import {OpenSheetMusicDisplayLowVersion} from "./OpenSheetMusicDisplayLowVersion";
 import {GraphicalMusicSheet} from "../MusicalScore/Graphical/GraphicalMusicSheet";
 import {Instrument} from "../MusicalScore/Instrument";
 import {Note} from "../MusicalScore/VoiceData/Note";
@@ -14,7 +14,7 @@ import {SourceMeasure} from "../MusicalScore";
  * A cursor which can iterate through the music sheet.
  */
 export class Cursor {
-  constructor(container: HTMLElement, openSheetMusicDisplay: OpenSheetMusicDisplay) {
+  constructor(container: HTMLElement, openSheetMusicDisplay: OpenSheetMusicDisplayLowVersion) {
     this.container = container;
     this.openSheetMusicDisplay = openSheetMusicDisplay;
     const curs: HTMLElement = document.createElement("img");
@@ -25,7 +25,7 @@ export class Cursor {
   }
 
   private container: HTMLElement;
-  private openSheetMusicDisplay: OpenSheetMusicDisplay;
+  private openSheetMusicDisplay: OpenSheetMusicDisplayLowVersion;
   private manager: MusicPartManager;
   protected iterator: MusicPartManagerIterator;
   private graphic: GraphicalMusicSheet;

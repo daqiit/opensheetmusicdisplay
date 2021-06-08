@@ -1,4 +1,4 @@
-import { OpenSheetMusicDisplay } from "../../src/OpenSheetMusicDisplay/OpenSheetMusicDisplay";
+import { OpenSheetMusicDisplayLowVersion } from "../../src/OpenSheetMusicDisplay/OpenSheetMusicDisplayLowVersion";
 
 /**
  * This class collects useful methods to interact with test data.
@@ -39,7 +39,7 @@ export class TestUtils {
         }
     }
 
-    public static createOpenSheetMusicDisplay(div: HTMLElement): OpenSheetMusicDisplay {
-        return new OpenSheetMusicDisplay(div, {autoResize: false});
+    public static createOpenSheetMusicDisplay(div: HTMLElement): OpenSheetMusicDisplayLowVersion {
+        return new OpenSheetMusicDisplayLowVersion(div, {autoResize: false});
     }
 }

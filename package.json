@@ -1,8 +1,8 @@
 {
-  "name": "opensheetmusicdisplay",
+  "name": "opensheetmusicdisplaylowversion",
   "version": "0.7.3",
   "description": "An open source JavaScript engine for displaying MusicXML based on VexFlow.",
-  "main": "build/opensheetmusicdisplay.min.js",
+  "main": "build/opensheetmusicdisplaylowversion.min.js",
   "typings": "build/dist/src/",
   "scripts": {
     "docs": "typedoc --out ./build/docs --name OpenSheetMusicDisplay --module commonjs --target ES5 --ignoreCompilerErrors --mode file ./src",
@@ -31,7 +31,7 @@
   ],
   "files": [
     "build/dist/src",
-    "build/opensheetmusicdisplay.min.js",
+    "build/opensheetmusicdisplaylowversion.min.js",
     "AUTHORS",
     "CHANGELOG.md",
     "README.md",

@@ -37,7 +37,7 @@ import StaveNote = Vex.Flow.StaveNote;
  * It can display MusicXML sheet music files in an HTML element container.<br>
  * After the constructor, use load() and render() to load and render a MusicXML file.
  */
-export class OpenSheetMusicDisplay {
+export class OpenSheetMusicDisplayLowVersion {
     private version: string = "0.7.3-dev"; // getter: this.Version
     // at release, bump version and change to -release, afterwards to -dev again
 
@@ -100,7 +100,7 @@ export class OpenSheetMusicDisplay {
         if (typeof content === "string") {
 
             const str: string = <string>content;
-            const self: OpenSheetMusicDisplay = this;
+            const self: OpenSheetMusicDisplayLowVersion = this;
             if (str.substr(0, 4) === "\x50\x4b\x03\x04") {
                 log.debug("[OSMD] This is a zip file, unpack it first: " + str);
                 // This is a zip file, unpack it first
@@ -467,7 +467,7 @@ export class OpenSheetMusicDisplay {
             // we could remove the window EventListener here, but not necessary.
         }
         if (options.pageFormat !== undefined) { // only change this option if it was given, see above
-            EngravingRules.Rules.PageFormat = OpenSheetMusicDisplay.StringToPageFormat(options.pageFormat);
+            EngravingRules.Rules.PageFormat = OpenSheetMusicDisplayLowVersion.StringToPageFormat(options.pageFormat);
         }
         if (options.pageBackgroundColor !== undefined) {
             EngravingRules.Rules.PageBackgroundColor = options.pageBackgroundColor;
@@ -563,7 +563,7 @@ export class OpenSheetMusicDisplay {
      */
     private autoResize(): void {
 
-        const self: OpenSheetMusicDisplay = this;
+        const self: OpenSheetMusicDisplayLowVersion = this;
         this.handleResize(
             () => {
                 // empty
@@ -595,7 +595,7 @@ export class OpenSheetMusicDisplay {
         let rtime: number;
         let timeout: number = undefined;
         const delta: number = 200;
-        const self: OpenSheetMusicDisplay = this;
+        const self: OpenSheetMusicDisplayLowVersion = this;
 
         function resizeStart(): void {
             if (!self.AutoResizeEnabled) {
@@ -684,15 +684,15 @@ export class OpenSheetMusicDisplay {
         formatId = formatId.replace("Portrait", "P");
         //console.log("change format to: " + formatId);
         let f: PageFormat = PageFormat.UndefinedPageFormat; // default: 'endless' page height, take canvas/container width
-        if (OpenSheetMusicDisplay.PageFormatStandards.hasOwnProperty(formatId)) {
-            f = OpenSheetMusicDisplay.PageFormatStandards[formatId];
+        if (OpenSheetMusicDisplayLowVersion.PageFormatStandards.hasOwnProperty(formatId)) {
+            f = OpenSheetMusicDisplayLowVersion.PageFormatStandards[formatId];
         }
         return f;
     }
 
     /** Sets page format by string. Alternative to setOptions({pageFormat: PageFormatStandards.Endless}) for example. */
     public setPageFormat(formatId: string): void {
-        const newPageFormat: PageFormat = OpenSheetMusicDisplay.StringToPageFormat(formatId);
+        const newPageFormat: PageFormat = OpenSheetMusicDisplayLowVersion.StringToPageFormat(formatId);
         this.needBackendUpdate = !(newPageFormat.Equals(EngravingRules.Rules.PageFormat));
         EngravingRules.Rules.PageFormat = newPageFormat;
     }

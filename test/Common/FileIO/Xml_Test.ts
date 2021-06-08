@@ -1,6 +1,6 @@
 import {IXmlElement} from "../../../src/Common/FileIO/Xml";
 import {TestUtils} from "../../Util/TestUtils";
-import {OpenSheetMusicDisplay} from "../../../src/OpenSheetMusicDisplay/OpenSheetMusicDisplay";
+import {OpenSheetMusicDisplayLowVersion} from "../../../src/OpenSheetMusicDisplay/OpenSheetMusicDisplayLowVersion";
 
 // Test XML simple document
 const xmlTestData: string = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\
@@ -48,7 +48,7 @@ describe("XML interface", () => {
             // Load the xml file content
             const score: Document = TestUtils.getScore(scoreName);
             const div: HTMLElement = document.createElement("div");
-            const openSheetMusicDisplay: OpenSheetMusicDisplay =
+            const openSheetMusicDisplay: OpenSheetMusicDisplayLowVersion =
                 TestUtils.createOpenSheetMusicDisplay(div);
             openSheetMusicDisplay.load(score);
             done();

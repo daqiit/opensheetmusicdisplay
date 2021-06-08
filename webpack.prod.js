@@ -14,7 +14,7 @@ module.exports = merge(common, {
     output: {
         filename: '[name].min.js',
         path: path.resolve(__dirname, 'build'),
-        library: 'opensheetmusicdisplay',
+        library: 'opensheetmusicdisplaylowversion',
         libraryTarget: 'umd'
     },
     mode: 'production',

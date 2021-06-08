@@ -1,4 +1,4 @@
-import { OpenSheetMusicDisplay } from '../src/OpenSheetMusicDisplay/OpenSheetMusicDisplay';
+import { OpenSheetMusicDisplayLowVersion } from '../src/OpenSheetMusicDisplay/OpenSheetMusicDisplayLowVersion';
 
 /*jslint browser:true */
 (function () {
@@ -317,7 +317,7 @@ import { OpenSheetMusicDisplay } from '../src/OpenSheetMusicDisplay/OpenSheetMus
         }
 
         // Create OSMD object and canvas
-        openSheetMusicDisplay = new OpenSheetMusicDisplay(canvas, {
+        openSheetMusicDisplay = new OpenSheetMusicDisplayLowVersion(canvas, {
             autoResize: true,
             backend: backendType,
             //backend: "canvas",
@@ -399,7 +399,7 @@ import { OpenSheetMusicDisplay } from '../src/OpenSheetMusicDisplay/OpenSheetMus
             if (createNewOsmd) {
                 // clears the canvas element
                 canvas.innerHTML = "";
-                openSheetMusicDisplay = new OpenSheetMusicDisplay(canvas, { backend: value });
+                openSheetMusicDisplay = new OpenSheetMusicDisplayLowVersion(canvas, { backend: value });
                 openSheetMusicDisplay.setLogLevel('info'); // set this to 'debug' if you want to get more detailed control flow information
             } else {
                 // alternative, doesn't work yet, see setOptions():
