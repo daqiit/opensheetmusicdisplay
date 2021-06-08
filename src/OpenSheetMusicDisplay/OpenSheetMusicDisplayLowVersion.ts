@@ -237,6 +237,7 @@ export class OpenSheetMusicDisplayLowVersion {
 
         if (this.drawingParameters.drawCursors && this.cursor) {
             // Update the cursor position
+            this.cursor.show();
             this.cursor.update();
         }
         //console.log("[OSMD] render finished");

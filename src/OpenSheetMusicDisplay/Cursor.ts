@@ -42,7 +42,7 @@ export class Cursor {
     this.manager = manager;
     this.reset();
     this.graphic = graphic;
-    this.show();
+    this.hide();
   }
 
   /**
